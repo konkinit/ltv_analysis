@@ -23,10 +23,12 @@ def import_from_S3(
 
     return read_csv(
                 fs.open(f"{bucket}/{path}/online_retail_data.csv"),
+                encoding='unicode_escape'
             )
 
 
 def import_from_local(path) -> DataFrame:
     return read_csv(
                 f"{path}/data/online_retail_data.csv",
-                encoding="utf-8").set_index("Customer_ID")
+                encoding='unicode_escape'
+            ).set_index("Customer_ID")

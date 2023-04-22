@@ -1,10 +1,14 @@
-from .import_dataset import (
+from .import_data import (
     getDataset,
-    ImportData
+    RawFeatures
+)
+from .process_data import (
+    ProcessData
 )
 
 
 __all__ = [
     "getDataset",
-    "ImportData"
+    "RawFeatures",
+    "ProcessData"
 ]
