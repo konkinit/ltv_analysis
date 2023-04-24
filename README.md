@@ -14,6 +14,10 @@
 
 ## Project description
 
+- The BG/NBD model predicts the future expected number of transactions over a pre-defined period
+together with the probability of a customer being alive.
+- Gamma-Gamma model will tie into the BG/NBD model to predict the expected monetary value of the
+purchases in terms of current dollar value after discounting at a predetermined discount rate.
 
 
 ## References

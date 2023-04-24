@@ -5,7 +5,8 @@ from pandas import (
     DataFrame
 )
 from lifetimes.utils import (
-    summary_data_from_transaction_data
+    summary_data_from_transaction_data,
+    calibration_and_holdout_data
 )
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
@@ -13,10 +14,16 @@ from src.data import RawFeatures
 
 
 class ProcessData:
-    def __init__(self, data):
+    def __init__(
+            self,
+            data: DataFrame,
+            freq: str,
+            calibration_period_end: str):
         self.data = data.copy()
+        self.freq = freq
+        self.calibration_period_end = calibration_period_end
 
-    def processing_stack(self) -> DataFrame:
+    def model_data(self) -> DataFrame:
         self.data[
             RawFeatures.TRANSACTION_DATE
             ] = to_datetime(
@@ -31,7 +38,7 @@ class ProcessData:
         self.data = self.data[(self.data[RawFeatures.QTY] > 0)]
         self.data[RawFeatures.TOTAL_PRICE] = (self.data[RawFeatures.QTY] *
                                               self.data[RawFeatures.PRICE])
-        self.data = summary_data_from_transaction_data(
+        df_ = summary_data_from_transaction_data(
                         self.data[[
                             RawFeatures.CUSTOMER_ID,
                             RawFeatures.TRANSACTION_DATE,
@@ -39,6 +46,18 @@ class ProcessData:
                         customer_id_col=RawFeatures.CUSTOMER_ID,
                         datetime_col=RawFeatures.TRANSACTION_DATE,
                         monetary_value_col=RawFeatures.TOTAL_PRICE,
-                        freq='D'
+                        freq=self.freq
                     )
-        return self.data[self.data['frequency'] > 0]
+        return df_[df_['frequency'] > 0]
+
+    def model_validation_data(self):
+        summary_cal_holdout = calibration_and_holdout_data(
+                self.data,
+                RawFeatures.CUSTOMER_ID,
+                RawFeatures.TRANSACTION_DATE,
+                freq=self.freq,
+                monetary_value_col=RawFeatures.TOTAL_PRICE,
+                calibration_period_end=self.calibration_period_end
+            )
+
+        return summary_cal_holdout[summary_cal_holdout['frequency_cal'] > 0]
