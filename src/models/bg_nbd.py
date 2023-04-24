@@ -21,7 +21,9 @@ class BetaGeoModel(BetaGeoFitter):
             } <= set(data.columns.tolist())
             )
         """
-        super().__init__(penalizer_coef=penalizer_coef_)
+        super().__init__(
+            penalizer_coef=penalizer_coef_
+        )
         self.data = data
 
     def fit_(self) -> None:
@@ -39,4 +41,7 @@ class BetaGeoModel(BetaGeoFitter):
         )
 
     def plot_(self) -> None:
+        pass
+
+    def probability_alive_(self):
         pass

@@ -50,7 +50,7 @@ class ProcessData:
                     )
         return df_[df_['frequency'] > 0]
 
-    def model_validation_data(self):
+    def model_cal_holdout_data(self):
         summary_cal_holdout = calibration_and_holdout_data(
                 self.data,
                 RawFeatures.CUSTOMER_ID,
