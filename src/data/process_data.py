@@ -27,8 +27,7 @@ class ProcessData:
         self.data[
             RawFeatures.TRANSACTION_DATE
             ] = to_datetime(
-                    self.data[RawFeatures.TRANSACTION_DATE],
-                    format='mixed'
+                    self.data[RawFeatures.TRANSACTION_DATE]
                 ).dt.date
         self.data.dropna(
             axis=0,
@@ -39,25 +38,25 @@ class ProcessData:
         self.data[RawFeatures.TOTAL_PRICE] = (self.data[RawFeatures.QTY] *
                                               self.data[RawFeatures.PRICE])
         df_ = summary_data_from_transaction_data(
-                        self.data[[
-                            RawFeatures.CUSTOMER_ID,
-                            RawFeatures.TRANSACTION_DATE,
-                            RawFeatures.TOTAL_PRICE]],
-                        customer_id_col=RawFeatures.CUSTOMER_ID,
-                        datetime_col=RawFeatures.TRANSACTION_DATE,
-                        monetary_value_col=RawFeatures.TOTAL_PRICE,
-                        freq=self.freq
-                    )
+                    self.data[[
+                        RawFeatures.CUSTOMER_ID,
+                        RawFeatures.TRANSACTION_DATE,
+                        RawFeatures.TOTAL_PRICE]],
+                    customer_id_col=RawFeatures.CUSTOMER_ID,
+                    datetime_col=RawFeatures.TRANSACTION_DATE,
+                    monetary_value_col=RawFeatures.TOTAL_PRICE,
+                    freq=self.freq
+                )
         return df_[df_['frequency'] > 0]
 
     def model_cal_holdout_data(self):
         summary_cal_holdout = calibration_and_holdout_data(
-                self.data,
-                RawFeatures.CUSTOMER_ID,
-                RawFeatures.TRANSACTION_DATE,
-                freq=self.freq,
-                monetary_value_col=RawFeatures.TOTAL_PRICE,
-                calibration_period_end=self.calibration_period_end
-            )
+            self.data,
+            RawFeatures.CUSTOMER_ID,
+            RawFeatures.TRANSACTION_DATE,
+            freq=self.freq,
+            monetary_value_col=RawFeatures.TOTAL_PRICE,
+            calibration_period_end=self.calibration_period_end
+        )
 
         return summary_cal_holdout[summary_cal_holdout['frequency_cal'] > 0]

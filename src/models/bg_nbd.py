@@ -40,8 +40,8 @@ class BetaGeoModel(BetaGeoFitter):
             self.data['T_cal']
         )
 
-    def plot_(self) -> None:
+    def local_plots_(self, customer_id) -> None:
         pass
 
-    def probability_alive_(self):
+    def global_plots_(self):
         pass
