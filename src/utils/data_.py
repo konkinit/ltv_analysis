@@ -43,31 +43,54 @@ def import_from_local(path) -> DataFrame:
             ).set_index("Customer_ID")
 
 
-def get_customer_scoring_data(
+def get_customer_history_data(
         data_summary: DataFrame,
         customer_id: Union[int, float, str],
         n_period: int) -> DataFrame:
-    return DataFrame(
+    df_ = DataFrame(
                 dict(
                     Customer_ID=full(
-                                10,
+                                n_period,
                                 customer_id,
                                 dtype="int"
                             ),
                     frequency=full(
-                                10,
+                                n_period,
                                 data_summary.loc[customer_id][
                                     RawFeatures.frequency],
                                 dtype="int"
                             ),
                     recency=full(
-                                10,
+                                n_period,
                                 data_summary.loc[customer_id][
                                     RawFeatures.recency
                                 ]
                             ),
                     T=(
-                        arange(-1, 9)+data_summary.loc[customer_id][
+                        arange(-1, n_period-1)+data_summary.loc[customer_id][
                             RawFeatures.T
                         ]).astype("int"),
                 ))
+    df_.columns = [
+        RawFeatures.CUSTOMER_ID,
+        RawFeatures.frequency,
+        RawFeatures.recency,
+        RawFeatures.T
+    ]
+    return df_
+
+
+def get_customer_whatif_data(
+        data_summary: DataFrame,
+        customer_id: Union[int, float, str],
+        n_period: int,
+        T_future_transac: int) -> DataFrame:
+    history_ = get_customer_history_data(
+                    data_summary,
+                    customer_id,
+                    n_period
+                )
+    history_[RawFeatures.frequency].iloc[-T_future_transac:] += 1
+    history_[RawFeatures.recency].iloc[-T_future_transac:] = history_[
+        RawFeatures.T].iloc[-T_future_transac] - 0.5
+    return history_

@@ -11,6 +11,10 @@ if os.getcwd() not in sys.path:
 from src.config import (
     RawFeatures
 )
+from src.utils import (
+    get_customer_history_data,
+    get_customer_whatif_data
+)
 
 
 class BetaGeoModel(BetaGeoModel):
@@ -33,35 +37,55 @@ class BetaGeoModel(BetaGeoModel):
     def probability_alive(
             self,
             customer_history: DataFrame) -> Any:
-        self.expected_probability_alive(
+        return self.expected_probability_alive(
             customer_id=customer_history[RawFeatures.CUSTOMER_ID],
             frequency=customer_history[RawFeatures.frequency],
             recency=customer_history[RawFeatures.recency],
             T=customer_history[RawFeatures.T]
         )
 
-    def alive_plot(self, customer_id) -> None:
-        customer_history = customer_history_data(customer_id)
+    def plot_probability_alive(
+            self,
+            customer_id,
+            n_period,
+            *args) -> None:
+        customer_history = get_customer_whatif_data(
+                                self.data,
+                                customer_id,
+                                n_period,
+                                args[0]
+                            ) if args else get_customer_history_data(
+                                                self.data,
+                                                customer_id,
+                                                n_period,
+                                                args[0]
+                                            )
         p_alive = self.probability_alive(customer_history)
         az.plot_hdi(
-                customer_history["T"],
+                customer_history[RawFeatures.T],
                 p_alive,
                 color="C0"
             )
         plt.plot(
-            customer_history["T"],
+            customer_history[RawFeatures.T],
             p_alive.mean(("draw", "chain")),
             marker="o"
-            )
+        )
         plt.axvline(
-            customer_history["recency"].iloc[0],
+            customer_history[RawFeatures.recency].iloc[0],
             c="black",
             ls="--",
             label="Purchase"
+        )
+        if args:
+            plt.axvline(
+                customer_history[RawFeatures.recency].iloc[-1],
+                c="black",
+                ls="--"
             )
         plt.title(f"Probability Customer {customer_id} will purchase again")
         plt.xlabel("T")
-        plt.ylabel("p")
+        plt.ylabel("probability")
         plt.legend()
         plt.show()
 
