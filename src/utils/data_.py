@@ -1,7 +1,16 @@
+import os
+import sys
 import s3fs
+from numpy import full, arange
 from pandas import (
     read_csv,
     DataFrame
+)
+from typing import Union
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
+from src.config import (
+    RawFeatures
 )
 
 
@@ -32,3 +41,33 @@ def import_from_local(path) -> DataFrame:
                 f"{path}/data/online_retail_data.csv",
                 encoding='unicode_escape'
             ).set_index("Customer_ID")
+
+
+def get_customer_scoring_data(
+        data_summary: DataFrame,
+        customer_id: Union[int, float, str],
+        n_period: int) -> DataFrame:
+    return DataFrame(
+                dict(
+                    Customer_ID=full(
+                                10,
+                                customer_id,
+                                dtype="int"
+                            ),
+                    frequency=full(
+                                10,
+                                data_summary.loc[customer_id][
+                                    RawFeatures.frequency],
+                                dtype="int"
+                            ),
+                    recency=full(
+                                10,
+                                data_summary.loc[customer_id][
+                                    RawFeatures.recency
+                                ]
+                            ),
+                    T=(
+                        arange(-1, 9)+data_summary.loc[customer_id][
+                            RawFeatures.T
+                        ]).astype("int"),
+                ))

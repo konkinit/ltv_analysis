@@ -1,3 +1,4 @@
+from .config import config_data
 from .data import (
     import_data,
     process_data
@@ -11,6 +12,7 @@ from .utils import (
 )
 
 __all__ = [
+    "config_data",
     "import_data",
     "process_data",
     "bg_nbd",

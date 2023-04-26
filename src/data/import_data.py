@@ -8,19 +8,11 @@ from src.utils import (
     import_from_local,
     import_from_S3
 )
+from src.config import RawFeatures
 
 
 with open("./data/tokens.json") as f:
     tokens = json.load(f)
-
-
-@dataclass
-class RawFeatures:
-    CUSTOMER_ID: str = "Customer ID"
-    TRANSACTION_DATE: str = "InvoiceDate"
-    PRICE: str = "Price"
-    QTY: str = "Quantity"
-    TOTAL_PRICE: str = "Total Price"
 
 
 @dataclass

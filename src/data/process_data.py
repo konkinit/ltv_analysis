@@ -5,12 +5,11 @@ from pandas import (
     DataFrame
 )
 from lifetimes.utils import (
-    summary_data_from_transaction_data,
-    calibration_and_holdout_data
+    summary_data_from_transaction_data
 )
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.data import RawFeatures
+from src.config import RawFeatures
 
 
 class ProcessData:
@@ -47,16 +46,4 @@ class ProcessData:
                     monetary_value_col=RawFeatures.TOTAL_PRICE,
                     freq=self.freq
                 )
-        return df_[df_['frequency'] > 0]
-
-    def model_cal_holdout_data(self):
-        summary_cal_holdout = calibration_and_holdout_data(
-            self.data,
-            RawFeatures.CUSTOMER_ID,
-            RawFeatures.TRANSACTION_DATE,
-            freq=self.freq,
-            monetary_value_col=RawFeatures.TOTAL_PRICE,
-            calibration_period_end=self.calibration_period_end
-        )
-
-        return summary_cal_holdout[summary_cal_holdout['frequency_cal'] > 0]
+        return df_[df_[RawFeatures.frequency] > 0]

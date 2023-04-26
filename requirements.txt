@@ -1,5 +1,8 @@
-lifetimes==0.11.2
+lifetimes==0.11.1
 pytest==7.3.1
 PyYAML==6.0
 s3fs==2023.4.0
 flake8==6.0.0
+arviz==0.15.1
+pymc==5.3.0
+pymc_marketing==0.1.0
