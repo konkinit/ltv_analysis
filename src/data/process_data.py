@@ -9,7 +9,10 @@ from lifetimes.utils import (
 )
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.config import RawFeatures
+from src.config import (
+    RawFeatures,
+    RFM
+)
 
 
 class ProcessData:
@@ -46,4 +49,6 @@ class ProcessData:
                     monetary_value_col=RawFeatures.TOTAL_PRICE,
                     freq=self.freq
                 )
+        RFM.max_T = df_[RawFeatures.T].max()
+        RFM.max_recency = df_[RawFeatures.recency].max()
         return df_[df_[RawFeatures.frequency] > 0]

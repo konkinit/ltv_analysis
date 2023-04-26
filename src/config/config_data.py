@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Union
 
 
 @dataclass
@@ -11,3 +12,9 @@ class RawFeatures:
     frequency: str = "frequency"
     recency: str = "recency"
     T: str = "T"
+
+
+@dataclass
+class RFM:
+    max_recency: Union[int, float] = 0.0
+    max_T: Union[int, float] = 0.0

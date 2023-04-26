@@ -57,8 +57,7 @@ class BetaGeoModel(BetaGeoModel):
                             ) if args else get_customer_history_data(
                                                 self.data,
                                                 customer_id,
-                                                n_period,
-                                                args[0]
+                                                n_period
                                             )
         p_alive = self.probability_alive(customer_history)
         az.plot_hdi(
@@ -76,6 +75,12 @@ class BetaGeoModel(BetaGeoModel):
             c="black",
             ls="--",
             label="Purchase"
+        )
+        plt.axvline(
+            customer_history[RawFeatures.T].iloc[0],
+            c="red",
+            ls="--",
+            label="Instant t"
         )
         if args:
             plt.axvline(

@@ -1,4 +1,10 @@
-from .config_data import RawFeatures
+from .config_data import (
+    RawFeatures,
+    RFM
+)
 
 
-__all__ = ["RawFeatures"]
+__all__ = [
+    "RawFeatures",
+    "RFM"
+]

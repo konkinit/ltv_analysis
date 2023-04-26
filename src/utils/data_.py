@@ -47,6 +47,7 @@ def get_customer_history_data(
         data_summary: DataFrame,
         customer_id: Union[int, float, str],
         n_period: int) -> DataFrame:
+    # adapt the value of T
     df_ = DataFrame(
                 dict(
                     Customer_ID=full(

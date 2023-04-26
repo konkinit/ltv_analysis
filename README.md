@@ -4,8 +4,7 @@
 </h1>
 
 <p align="center">
-    Analyse and model customer lifetime value on retail dataset 
-</p>
+    Analyse and model customer lifetime value in a non-contractual business
 
 
 ## Get started
