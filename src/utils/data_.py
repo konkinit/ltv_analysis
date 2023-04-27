@@ -38,7 +38,7 @@ def import_from_S3(
 
 def import_from_local(path) -> DataFrame:
     return read_csv(
-                f"{path}/data/online_retail_data.csv",
+                path,
                 encoding='unicode_escape'
             ).set_index("Customer_ID")
 
@@ -47,7 +47,6 @@ def get_customer_history_data(
         data_summary: DataFrame,
         customer_id: Union[int, float, str],
         n_period_: int) -> Tuple[int, DataFrame]:
-    # adapt the value of T
     T_ = int(data_summary.loc[customer_id][RawFeatures.T])
     frequency_ = int(data_summary.loc[customer_id][RawFeatures.frequency])
     recency_ = int(data_summary.loc[customer_id][RawFeatures.recency])

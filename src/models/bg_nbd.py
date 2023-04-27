@@ -1,11 +1,15 @@
 import os
 import sys
-import arviz as az
-import matplotlib.pyplot as plt
+import plotly.express as px
 from pandas import DataFrame
 from pymc_marketing.clv import BetaGeoModel
 from pymc import HalfNormal
-from typing import Any, Tuple
+from typing import (
+    Any,
+    Tuple,
+    List,
+    Union
+)
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.config import (
@@ -20,8 +24,7 @@ from src.utils import (
 class BetaGeoModel(BetaGeoModel):
     def __init__(
             self,
-            data: DataFrame,
-            T_prediction: int) -> None:
+            data: DataFrame) -> None:
         self.data = data.copy()
         super().__init__(
             customer_id=self.data.index,
@@ -55,8 +58,9 @@ class BetaGeoModel(BetaGeoModel):
 
     def plot_probability_alive(
             self,
-            customer_id,
-            n_period,
+            customer_id: Union[float, int, str],
+            n_period: int,
+            fig_dim: List[int],
             *args) -> None:
         T_, customer_history = get_customer_whatif_data(
                                 self.data,
@@ -72,39 +76,48 @@ class BetaGeoModel(BetaGeoModel):
             T_,
             customer_history
         )
-        az.plot_hdi(
+        """az.plot_hdi(
                 customer_history[RawFeatures.T],
                 p_alive,
                 color="C0"
+        )"""
+        fig = px.line(
+            x=customer_history[RawFeatures.T],
+            y=p_alive.median(("draw", "chain")),
+            width=fig_dim[0],
+            height=fig_dim[1],
+            markers=True,
+            line_shape='linear',
+            title=f"Probability Customer {customer_id} will purchase again"
             )
-        plt.plot(
-            customer_history[RawFeatures.T],
-            p_alive.median(("draw", "chain")),
-            marker="o"
+        fig.update_traces(patch={"line_shape": "spline"})
+        fig.add_vline(
+            x=T_,
+            line_width=3,
+            line_dash="dash",
+            line_color="red",
+            annotation_text="Instant t"
         )
-        plt.axvline(
-            customer_history[RawFeatures.recency].iloc[0],
-            c="black",
-            ls="--",
-            label="Purchase"
-        )
-        plt.axvline(
-            T_,
-            c="red",
-            ls="--",
-            label="Instant t"
+        fig.add_vline(
+            x=customer_history[RawFeatures.recency].iloc[0],
+            line_width=3,
+            line_dash="dash",
+            line_color="black",
+            annotation_text="Purchase"
         )
         if args:
-            plt.axvline(
-                customer_history[RawFeatures.recency].iloc[-1],
-                c="black",
-                ls="--"
+            fig.add_vline(
+                x=customer_history[RawFeatures.recency].iloc[-1],
+                line_width=3,
+                line_dash="dash",
+                line_color="black",
+                annotation_text="Purchase"
             )
-        plt.title(f"Probability Customer {customer_id} will purchase again")
-        plt.xlabel("T")
-        plt.ylabel("probability")
-        plt.legend()
-        plt.show()
+        fig.update_layout(
+            xaxis_title="T",
+            yaxis_title="probability"
+        )
+        fig.show()
 
     def global_plots_(self):
         pass

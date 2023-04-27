@@ -9,7 +9,8 @@
 
 ## To Do
 
-- Swwitch to plotly as plotter, rather than matplotlib
+- Add density plot
+- Change the T axis to an date axis
 
 ## Get started
 

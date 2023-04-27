@@ -17,7 +17,7 @@ with open("./data/tokens.json") as f:
 
 @dataclass
 class ImportData:
-    local_path: str = "."
+    local_path: str = "./data/online_retail_data.csv"
     endpoint: str = tokens["endpoint_url"]
     bucket: str = tokens["bucket"]
     path: str = tokens["path"]
@@ -28,7 +28,7 @@ class ImportData:
 
 def getDataset():
     params = ImportData()
-    try:
+    if os.path.isfile(os.path.join(params.local_path)):
         return import_from_local(
                 params.local_path
             )[[
@@ -37,17 +37,16 @@ def getDataset():
                 RawFeatures.PRICE,
                 RawFeatures.QTY
             ]]
-    finally:
-        return import_from_S3(
-                params.endpoint,
-                params.bucket,
-                params.path,
-                params.key_id,
-                params.access_key,
-                params.token
-            )[[
-                RawFeatures.CUSTOMER_ID,
-                RawFeatures.TRANSACTION_DATE,
-                RawFeatures.PRICE,
-                RawFeatures.QTY
-            ]]
+    return import_from_S3(
+            params.endpoint,
+            params.bucket,
+            params.path,
+            params.key_id,
+            params.access_key,
+            params.token
+        )[[
+            RawFeatures.CUSTOMER_ID,
+            RawFeatures.TRANSACTION_DATE,
+            RawFeatures.PRICE,
+            RawFeatures.QTY
+        ]]

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Union
+from datetime import date
 
 
 @dataclass
@@ -18,3 +19,4 @@ class RawFeatures:
 class RFM:
     max_recency: Union[int, float] = 0.0
     max_T: Union[int, float] = 0.0
+    date_last_purchase: date = date.today()
