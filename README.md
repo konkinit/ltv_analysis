@@ -5,7 +5,11 @@
 
 <p align="center">
     Analyse and model customer lifetime value in a non-contractual business
+</p>
 
+## To Do
+
+- Swwitch to plotly as plotter, rather than matplotlib
 
 ## Get started
 
@@ -17,7 +21,6 @@
 together with the probability of a customer being alive.
 - Gamma-Gamma model will tie into the BG/NBD model to predict the expected monetary value of the
 purchases in terms of current dollar value after discounting at a predetermined discount rate.
-
 
 ## References
 

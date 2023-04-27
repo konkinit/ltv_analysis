@@ -6,7 +6,7 @@ from pandas import (
     read_csv,
     DataFrame
 )
-from typing import Union
+from typing import Union, Tuple
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.config import (
@@ -46,8 +46,12 @@ def import_from_local(path) -> DataFrame:
 def get_customer_history_data(
         data_summary: DataFrame,
         customer_id: Union[int, float, str],
-        n_period: int) -> DataFrame:
+        n_period_: int) -> Tuple[int, DataFrame]:
     # adapt the value of T
+    T_ = int(data_summary.loc[customer_id][RawFeatures.T])
+    frequency_ = int(data_summary.loc[customer_id][RawFeatures.frequency])
+    recency_ = int(data_summary.loc[customer_id][RawFeatures.recency])
+    n_period = int(T_ - recency_ + 2 + n_period_)
     df_ = DataFrame(
                 dict(
                     Customer_ID=full(
@@ -57,20 +61,15 @@ def get_customer_history_data(
                             ),
                     frequency=full(
                                 n_period,
-                                data_summary.loc[customer_id][
-                                    RawFeatures.frequency],
+                                frequency_,
                                 dtype="int"
                             ),
                     recency=full(
                                 n_period,
-                                data_summary.loc[customer_id][
-                                    RawFeatures.recency
-                                ]
+                                recency_,
+                                dtype="int"
                             ),
-                    T=(
-                        arange(-1, n_period-1)+data_summary.loc[customer_id][
-                            RawFeatures.T
-                        ]).astype("int"),
+                    T=(arange(recency_-1, T_+n_period_+1)).astype("int"),
                 ))
     df_.columns = [
         RawFeatures.CUSTOMER_ID,
@@ -78,20 +77,25 @@ def get_customer_history_data(
         RawFeatures.recency,
         RawFeatures.T
     ]
-    return df_
+    return T_, df_
 
 
 def get_customer_whatif_data(
         data_summary: DataFrame,
         customer_id: Union[int, float, str],
         n_period: int,
-        T_future_transac: int) -> DataFrame:
-    history_ = get_customer_history_data(
+        T_future_transac: int) -> Tuple[int, DataFrame]:
+    assert T_future_transac <= n_period, "Future \
+        transaction must be before the end of future window"
+    T_, history_ = get_customer_history_data(
                     data_summary,
                     customer_id,
                     n_period
                 )
-    history_[RawFeatures.frequency].iloc[-T_future_transac:] += 1
-    history_[RawFeatures.recency].iloc[-T_future_transac:] = history_[
-        RawFeatures.T].iloc[-T_future_transac] - 0.5
-    return history_
+    new_transac_time = history_[
+        history_["T"] == T_
+        ].index.values[0] + T_future_transac
+    history_[RawFeatures.frequency].iloc[new_transac_time:] += 1
+    history_[RawFeatures.recency].iloc[new_transac_time:] = history_[
+        RawFeatures.T].iloc[new_transac_time] - 0.01
+    return T_, history_

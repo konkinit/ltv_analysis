@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame
 from pymc_marketing.clv import BetaGeoModel
 from pymc import HalfNormal
-from typing import Any
+from typing import Any, Tuple
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.config import (
@@ -36,20 +36,29 @@ class BetaGeoModel(BetaGeoModel):
 
     def probability_alive(
             self,
-            customer_history: DataFrame) -> Any:
-        return self.expected_probability_alive(
+            T_: int,
+            customer_history: DataFrame) -> Tuple[Any]:
+        alive_proba_xarray = self.expected_probability_alive(
             customer_id=customer_history[RawFeatures.CUSTOMER_ID],
             frequency=customer_history[RawFeatures.frequency],
             recency=customer_history[RawFeatures.recency],
             T=customer_history[RawFeatures.T]
         )
+        alive_proba_study_time = alive_proba_xarray.median(
+                                    ("draw", "chain")
+                                ).to_numpy()[
+                                    customer_history[
+                                        customer_history["T"] == T_
+                                    ].index.values[0]
+                                ]
+        return alive_proba_study_time, alive_proba_xarray
 
     def plot_probability_alive(
             self,
             customer_id,
             n_period,
             *args) -> None:
-        customer_history = get_customer_whatif_data(
+        T_, customer_history = get_customer_whatif_data(
                                 self.data,
                                 customer_id,
                                 n_period,
@@ -59,7 +68,10 @@ class BetaGeoModel(BetaGeoModel):
                                                 customer_id,
                                                 n_period
                                             )
-        p_alive = self.probability_alive(customer_history)
+        _, p_alive = self.probability_alive(
+            T_,
+            customer_history
+        )
         az.plot_hdi(
                 customer_history[RawFeatures.T],
                 p_alive,
@@ -67,7 +79,7 @@ class BetaGeoModel(BetaGeoModel):
             )
         plt.plot(
             customer_history[RawFeatures.T],
-            p_alive.mean(("draw", "chain")),
+            p_alive.median(("draw", "chain")),
             marker="o"
         )
         plt.axvline(
@@ -77,7 +89,7 @@ class BetaGeoModel(BetaGeoModel):
             label="Purchase"
         )
         plt.axvline(
-            customer_history[RawFeatures.T].iloc[0],
+            T_,
             c="red",
             ls="--",
             label="Instant t"
