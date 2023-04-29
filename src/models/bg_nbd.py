@@ -1,6 +1,5 @@
 import os
 import sys
-import plotly.graph_objects as go
 from pandas import DataFrame
 from pymc_marketing.clv import BetaGeoModel
 from pymc import HalfNormal
@@ -17,7 +16,8 @@ from src.config import (
 )
 from src.utils import (
     get_customer_history_data,
-    get_customer_whatif_data
+    get_customer_whatif_data,
+    plot_
 )
 
 
@@ -41,7 +41,7 @@ class BetaGeoModel(BetaGeoModel):
             self,
             T_: int,
             customer_history: DataFrame
-            ) -> Tuple[float, float, float, Any]:
+            ) -> Tuple[float, float, Any]:
         p_alive_xarray = self.expected_probability_alive(
             customer_id=customer_history[RawFeatures.CUSTOMER_ID],
             frequency=customer_history[RawFeatures.frequency],
@@ -50,19 +50,29 @@ class BetaGeoModel(BetaGeoModel):
         )
         min_p_alive_ = p_alive_xarray.to_numpy().min(axis=0).min(axis=0)
         max_p_alive_ = p_alive_xarray.to_numpy().max(axis=0).max(axis=0)
-        alive_proba_study_time = p_alive_xarray.median(
-                                    ("draw", "chain")
-                                ).to_numpy()[
-                                    customer_history[
-                                        customer_history["T"] == T_
-                                    ].index.values[0]
-                                ]
         return (
-            alive_proba_study_time,
             min_p_alive_,
             max_p_alive_,
             p_alive_xarray
         )
+
+    def alive_proba_study_time(
+            self,
+            T_: int,
+            customer_history: DataFrame
+            ) -> float:
+        return self.expected_probability_alive(
+                    customer_id=customer_history[RawFeatures.CUSTOMER_ID],
+                    frequency=customer_history[RawFeatures.frequency],
+                    recency=customer_history[RawFeatures.recency],
+                    T=customer_history[RawFeatures.T]
+                ).median(
+                        ("draw", "chain")
+                    ).to_numpy()[
+                                customer_history[
+                                    customer_history["T"] == T_
+                                ].index.values[0]
+                            ]
 
     def plot_probability_alive(
             self,
@@ -80,8 +90,13 @@ class BetaGeoModel(BetaGeoModel):
                                                 customer_id,
                                                 n_period
                                             )
+        alive_p_study_time = self.alive_proba_study_time(
+                                T_,
+                                customer_history
+                            )
+        status_study_time_color = "green" if alive_p_study_time > 0.7 else \
+            "yellow" if alive_p_study_time > 0.4 else "red"
         (
-            alive_proba_study_time,
             min_p_alive_,
             max_p_alive_,
             p_alive_xarray
@@ -89,57 +104,21 @@ class BetaGeoModel(BetaGeoModel):
                 T_,
                 customer_history
             )
-
-        fig = go.Figure([
-                go.Scatter(
-                    x=customer_history[RawFeatures.T],
-                    y=p_alive_xarray.median(("draw", "chain")),
-                    width=4,
-                    marker=True,
-                ),
-                go.Scatter(
-                    x=list(
-                        customer_history[RawFeatures.T]
-                      )+list(
-                            customer_history[RawFeatures.T][::-1]
-                        ),
-                    y=list(max_p_alive_)+list(min_p_alive_[::-1]),
-                    fill='toself',
-                    hoverinfo='skip',
-                    showlegend=False,
-                )
-            ])
-        fig.update_layout(
-            xaxis_title="T",
-            yaxis_title="probability",
-            title=f"Probability Customer {customer_id} will purchase again",
-            hovermode='x',
-            width=fig_dim[0],
-            height=fig_dim[1],
+        plot_(
+            customer_id,
+            customer_history,
+            T_,
+            p_alive_xarray,
+            status_study_time_color,
+            max_p_alive_,
+            min_p_alive_,
+            fig_dim,
+            args
         )
-        fig.add_vline(
-            x=T_,
-            line_width=3,
-            line_dash="dash",
-            line_color="red",
-            annotation_text="Instant t"
-        )
-        fig.add_vline(
-            x=customer_history[RawFeatures.recency].iloc[0],
-            line_width=3,
-            line_dash="dash",
-            line_color="black",
-            annotation_text="Purchase"
-        )
-        if args:
-            fig.add_vline(
-                x=customer_history[RawFeatures.recency].iloc[-1],
-                line_width=3,
-                line_dash="dash",
-                line_color="black",
-                annotation_text="Purchase"
-            )
-        fig.show()
 
     def global_plots_(self):
+        """
+        clv.plot_probability_alive_matrix(bgm)
+        plt.show()
+        """
         pass

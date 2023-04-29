@@ -9,7 +9,7 @@
 
 ## To Do
 
-- Add density plot
+- Display alive matric plot
 - Change the T axis to an date axis
 
 ## Get started
