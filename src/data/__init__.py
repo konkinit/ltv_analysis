@@ -5,10 +5,14 @@ from .import_data import (
 from .process_data import (
     ProcessData
 )
+from .stats_data import (
+    Statistics
+)
 
 
 __all__ = [
     "getDataset",
     "RawFeatures",
-    "ProcessData"
+    "ProcessData",
+    "Statistics"
 ]

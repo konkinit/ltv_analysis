@@ -1,6 +1,7 @@
-from dataclasses import dataclass, field
-from typing import Union, List
 from datetime import date
+from dataclasses import dataclass, field
+from pandas import DataFrame
+from typing import Union, List
 
 
 @dataclass
@@ -18,6 +19,11 @@ class RawFeatures:
 @dataclass
 class Metadata_Features:
     n_distinct_customers: int
+    n_vars: int
+    n_transactions: int
+    first_transac_date: str
+    last_transac_date: str
+    df_desc_qty_price: DataFrame
 
 
 @dataclass
