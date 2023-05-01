@@ -9,6 +9,7 @@ from .models import (
     bg_nbd
 )
 from .utils import (
+    datetime_formatting,
     import_from_local,
     import_from_S3,
     get_customer_history_data,
@@ -18,6 +19,7 @@ from .utils import (
 )
 
 __all__ = [
+    "datetime_formatting",
     "config_data",
     "import_data",
     "process_data",

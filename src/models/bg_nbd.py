@@ -41,6 +41,9 @@ class BetaGeoModel(BetaGeoModel):
             r_prior=HalfNormal.dist(10),
         )
 
+    def fit_or_load_model(self):
+        pass
+
     def probability_alive_xarray(
             self,
             T_: int,

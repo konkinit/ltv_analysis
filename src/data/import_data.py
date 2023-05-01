@@ -9,6 +9,7 @@ from src.utils import (
     import_from_S3
 )
 from src.config import RawFeatures
+from src.utils import datetime_formatting
 
 
 with open("./data/tokens.json") as f:
@@ -29,7 +30,8 @@ class ImportData:
 def getDataset():
     params = ImportData()
     if os.path.isfile(os.path.join(params.local_path)):
-        return import_from_local(
+        return datetime_formatting(
+            import_from_local(
                 params.local_path
             )[[
                 RawFeatures.CUSTOMER_ID,
@@ -37,7 +39,9 @@ def getDataset():
                 RawFeatures.PRICE,
                 RawFeatures.QTY
             ]]
-    return import_from_S3(
+        )
+    return datetime_formatting(
+        import_from_S3(
             params.endpoint,
             params.bucket,
             params.path,
@@ -50,3 +54,4 @@ def getDataset():
             RawFeatures.PRICE,
             RawFeatures.QTY
         ]]
+    )

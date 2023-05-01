@@ -1,6 +1,7 @@
 import os
 import sys
 import s3fs
+from datetime import datetime
 from numpy import full, arange
 import plotly.graph_objects as go
 from pandas import (
@@ -15,6 +16,26 @@ from src.config import (
 )
 
 
+def datetime_formatting(
+        df_transaction_: DataFrame,
+        flag: bool = False,
+        input_dt_format: str = '%d/%m/%Y %H:%M',
+        output_dt_format: str = '%Y-%m-%d %H:%M') -> DataFrame:
+    df_transaction = df_transaction_.copy()
+    if flag:
+        return df_transaction
+    df_transaction[
+        RawFeatures.TRANSACTION_DATE
+        ] = df_transaction[
+                RawFeatures.TRANSACTION_DATE
+                ].apply(
+                    lambda x: datetime.strptime(
+                        x,
+                        input_dt_format
+                        ).strftime(output_dt_format) if x == x else x)
+    return df_transaction
+
+
 def import_from_S3(
         endpoint: str,
         bucket: str,
@@ -23,7 +44,7 @@ def import_from_S3(
         access_key: str,
         token: str) -> DataFrame:
     """
-    enabling conexion to s3 storage for data retrieving
+    Connect to anS3 bucket and get data
     """
     fs = s3fs.S3FileSystem(
             client_kwargs={'endpoint_url': endpoint},
