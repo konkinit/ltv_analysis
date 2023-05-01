@@ -16,6 +16,8 @@ from src.config import (
 
 
 class ProcessData:
+    RFM_data_updater = RFM()
+
     def __init__(
             self,
             data: DataFrame,
@@ -24,6 +26,9 @@ class ProcessData:
         self.data = data.copy()
         self.freq = freq
         self.calibration_period_end = calibration_period_end
+        self.RFM_data_updater.date_last_purchase = [self.data[
+                                    RawFeatures.TRANSACTION_DATE
+                                    ].dropna().sort_values().values[-1]]
 
     def model_data(self) -> DataFrame:
         self.data[
@@ -49,6 +54,6 @@ class ProcessData:
                     monetary_value_col=RawFeatures.TOTAL_PRICE,
                     freq=self.freq
                 )
-        RFM.max_T = df_[RawFeatures.T].max()
-        RFM.max_recency = df_[RawFeatures.recency].max()
+        self.RFM_data_updater.max_T = [df_[RawFeatures.T].max()]
+        self.RFM_data_updater.max_recency = [df_[RawFeatures.recency].max()]
         return df_[df_[RawFeatures.frequency] > 0]

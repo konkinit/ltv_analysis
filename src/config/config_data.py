@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Union
+from dataclasses import dataclass, field
+from typing import Union, List
 from datetime import date
 
 
@@ -17,6 +17,6 @@ class RawFeatures:
 
 @dataclass
 class RFM:
-    max_recency: Union[int, float] = 0.0
-    max_T: Union[int, float] = 0.0
-    date_last_purchase: date = date.today()
+    max_recency: List[Union[int, float]] = field(default_factory=list)
+    max_T: List[Union[int, float]] = field(default_factory=list)
+    date_last_purchase: List[date] = field(default_factory=list)

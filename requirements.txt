@@ -8,3 +8,4 @@ pymc==5.3.0
 pymc_marketing==0.1.0
 streamlit==1.21.0
 plotly==5.14.1
+pydantic==1.10.7
