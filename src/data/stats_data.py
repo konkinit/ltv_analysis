@@ -5,7 +5,8 @@ from typing import Tuple
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.config import (
-    RawFeatures
+    RawFeatures,
+    Metadata_Features
 )
 
 
@@ -16,7 +17,7 @@ class Statistics:
         self.data = data.copy()
 
     def metadata_stats(
-            self) -> Tuple[int, int, str, str, DataFrame]:
+            self) -> Metadata_Features:
         n_transactions = self.data.shape[0]
         n_vars = self.data.shape[1]
         n_distinct_custumers = len(
@@ -32,13 +33,13 @@ class Statistics:
                                 RawFeatures.QTY,
                                 RawFeatures.PRICE
                                 ]].describe().iloc[[0, 1, 3, 5, 7], :]
-        return (
-            n_distinct_custumers,
-            n_vars,
-            n_transactions,
-            first_transac_date,
-            last_transac_date,
-            df_desc_qty_price
+        return Metadata_Features(
+                    n_distinct_custumers,
+                    n_vars,
+                    n_transactions,
+                    first_transac_date,
+                    last_transac_date,
+                    df_desc_qty_price
         )
 
     def rfm_data_stats(self) -> Tuple[int, DataFrame]:
