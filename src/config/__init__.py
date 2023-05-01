@@ -1,10 +1,12 @@
 from .config_data import (
     RawFeatures,
-    RFM
+    Metadata_Features,
+    RFM_Features
 )
 
 
 __all__ = [
     "RawFeatures",
-    "RFM"
+    "Metadata_Features",
+    "RFM_Features"
 ]

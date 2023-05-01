@@ -14,3 +14,7 @@ st.markdown(
 st.subheader("Fader et al.'s approach overview")
 
 st.markdown("")
+
+st.subheader("About the app")
+
+st.markdown("")

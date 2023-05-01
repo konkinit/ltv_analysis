@@ -16,7 +16,12 @@ class RawFeatures:
 
 
 @dataclass
-class RFM:
+class Metadata_Features:
+    n_distinct_customers: int
+
+
+@dataclass
+class RFM_Features:
     max_recency: List[Union[int, float]] = field(default_factory=list)
     max_T: List[Union[int, float]] = field(default_factory=list)
     date_last_purchase: List[date] = field(default_factory=list)
