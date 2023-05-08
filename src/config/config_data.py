@@ -14,6 +14,14 @@ class RawFeatures:
     frequency: str = "frequency"
     recency: str = "recency"
     T: str = "T"
+    monetary: str = "monetary_value"
+
+
+@dataclass
+class DataProcessingFeatures:
+    data: DataFrame
+    study_freq: str
+    calibration_period_end: str
 
 
 @dataclass

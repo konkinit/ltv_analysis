@@ -9,3 +9,4 @@ pymc_marketing==0.1.0
 streamlit==1.22.0
 plotly==5.14.1
 pydantic==1.10.7
+black==23.3.0

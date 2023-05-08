@@ -1,13 +1,6 @@
-from .config import (
-    config_data
-)
-from .data import (
-    import_data,
-    process_data
-)
-from .models import (
-    bg_nbd
-)
+from .config import config_data
+from .data import import_data, process_data
+from .models import bg_nbd
 from .utils import (
     datetime_formatting,
     import_from_local,
@@ -15,7 +8,7 @@ from .utils import (
     get_customer_history_data,
     get_customer_whatif_data,
     color_features,
-    plot_
+    plot_,
 )
 
 __all__ = [
@@ -29,5 +22,5 @@ __all__ = [
     "get_customer_history_data",
     "get_customer_whatif_data",
     "color_features",
-    "plot_"
+    "plot_",
 ]

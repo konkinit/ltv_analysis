@@ -1,10 +1,10 @@
 FROM python:3.10-slim
 
-COPY . .
+COPY . /ltv_analysis
 
-WORKDIR /src/frontend
+WORKDIR /ltv_analysis
 
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-ENTRYPOINT ["streamlit", "run", "Onboarding.py"]
+ENTRYPOINT ["streamlit", "run", "./src/frontend/Onboarding.py"]

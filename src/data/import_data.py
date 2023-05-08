@@ -2,12 +2,10 @@ import os
 import sys
 import json
 from dataclasses import dataclass
+
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.utils import (
-    import_from_local,
-    import_from_S3
-)
+from src.utils import import_from_local, import_from_S3
 from src.config import RawFeatures
 from src.utils import datetime_formatting
 
@@ -31,14 +29,14 @@ def getDataset():
     params = ImportData()
     if os.path.isfile(os.path.join(params.local_path)):
         return datetime_formatting(
-            import_from_local(
-                params.local_path
-            )[[
-                RawFeatures.CUSTOMER_ID,
-                RawFeatures.TRANSACTION_DATE,
-                RawFeatures.PRICE,
-                RawFeatures.QTY
-            ]]
+            import_from_local(params.local_path)[
+                [
+                    RawFeatures.CUSTOMER_ID,
+                    RawFeatures.TRANSACTION_DATE,
+                    RawFeatures.PRICE,
+                    RawFeatures.QTY,
+                ]
+            ]
         )
     return datetime_formatting(
         import_from_S3(
@@ -47,11 +45,13 @@ def getDataset():
             params.path,
             params.key_id,
             params.access_key,
-            params.token
-        )[[
-            RawFeatures.CUSTOMER_ID,
-            RawFeatures.TRANSACTION_DATE,
-            RawFeatures.PRICE,
-            RawFeatures.QTY
-        ]]
+            params.token,
+        )[
+            [
+                RawFeatures.CUSTOMER_ID,
+                RawFeatures.TRANSACTION_DATE,
+                RawFeatures.PRICE,
+                RawFeatures.QTY,
+            ]
+        ]
     )

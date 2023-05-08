@@ -1,0 +1,4 @@
+extend-ignore = E203,E501
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
+max_complexity = 10
+max_line_length = 127

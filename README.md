@@ -9,7 +9,7 @@
 
 ## To Do
 
-- Change the T axis to an date axis
+- Change the `T` axis to an date axis
 - Build streamlit app
 
 ## Get started

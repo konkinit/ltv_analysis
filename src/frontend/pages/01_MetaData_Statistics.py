@@ -3,11 +3,8 @@ import sys
 import streamlit as st
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.data import (
-    getDataset,
-    Statistics,
-    ProcessData
-)
+from src.data import getDataset, Statistics, ProcessData
+from src.config import RawFeatures, DataProcessingFeatures
 
 
 st.title("Metadata Statistics")
@@ -16,35 +13,81 @@ df_transaction = getDataset()
 metadata_stats = Statistics(df_transaction).metadata_stats()
 
 st.markdown(
-    f"The dataset contains information on \
-    `{metadata_stats.n_distinct_customers}` distinct customers explained by \
-    `{metadata_stats.n_vars}` features. The dataset gathers \
-    `{metadata_stats.n_transactions}` transactions the first one carries out \
-    on `{metadata_stats.first_transac_date}` and the last one on \
-    `{metadata_stats.last_transac_date}`. \
-    Below an example of table \n"
+    "The following metrics and table describe the transaction \
+    dataset"
 )
 
-st.dataframe(
-    data=df_transaction.head(),
-    use_container_width=False
+colCust, colTransac = st.columns(2)
+colCust.metric("# of Distinct customers", f"\
+    {metadata_stats.n_distinct_customers}")
+colTransac.metric("# of Transactions", f"\
+    {metadata_stats.n_transactions}")
+
+colFTransac, colLTransac = st.columns(2)
+colFTransac.metric(
+    "First Transaction Date",
+    f"{metadata_stats.first_transac_date}"
+)
+colLTransac.metric(
+    "Last Transaction Date",
+    f"{metadata_stats.last_transac_date}"
 )
 
-data_summary = ProcessData(
-                    df_transaction,
-                    'D',
-                    '2011-06-30'
-                ).model_data()
-rfm_data_stats = Statistics(data_summary).rfm_data_stats()
+st.dataframe(data=df_transaction.head(), use_container_width=True)
+
+st.markdown(
+    " To pursue the analysis , two features are mandantory : \n\
+    - `study_frequency`: \n\
+    - `calibration_period_end`: "
+)
+
+study_freq = st.selectbox(
+    "Choose a frequency to compute the RFM features",
+    ('D', 'W', 'M'),
+    help="D stands for Day, W for Week and M for Month"
+)
+
+calibration_end_dt = st.text_input(
+    'Choose a date marking the calibaration end',
+    placeholder="2011-06-30",
+    max_chars=10,
+    help="The typed date must be in type YYYY-MM-DD"
+)
+
+processing_params = DataProcessingFeatures(
+    df_transaction.copy(),
+    study_freq,
+    calibration_end_dt
+)
+rfm_data = ProcessData(processing_params).model_data()
+rfm_data_stats = Statistics(rfm_data).rfm_data_stats()
 
 st.markdown(
     f"After processing raw dataset and using the `lifetimes` package, \
     we extract the following RFM data. {rfm_data_stats[0]} customers data \
     are eligible for remaining analysis.\
-    Below an example of table \n"
+    Below statistics about RFM features \n"
 )
 
-st.dataframe(
-    data=rfm_data_stats[1],
-    use_container_width=False
+colF, colR, colT, colM = st.columns(4)
+
+colR.metric("Recency", f"\
+    {rfm_data[RawFeatures().recency].mean().round(2)}")
+colF.metric("Frequency", f"\
+    {rfm_data[RawFeatures().frequency].mean().round(2)}")
+colM.metric("Monetary", f"\
+    {rfm_data[RawFeatures().monetary].mean().round(2)}")
+colT.metric(
+    "Age",
+    f"{rfm_data[RawFeatures().T].mean().round(2)} \
+        {processing_params.study_freq}"
 )
+st.dataframe(
+    data=rfm_data.head(),
+    use_container_width=True
+)
+
+
+@st.cache_data
+def get_rfm_data():
+    return rfm_data.stocks()
