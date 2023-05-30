@@ -8,7 +8,7 @@ from .utils import (
     get_customer_history_data,
     get_customer_whatif_data,
     color_features,
-    plot_,
+    _plot_probability_alive,
 )
 
 __all__ = [
@@ -22,5 +22,5 @@ __all__ = [
     "get_customer_history_data",
     "get_customer_whatif_data",
     "color_features",
-    "plot_",
+    "_plot_probability_alive",
 ]

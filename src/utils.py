@@ -1,14 +1,15 @@
 import os
 import sys
 import s3fs
-from datetime import datetime
+from datetime import datetime, timedelta
 from numpy import full, arange
 import plotly.graph_objects as go
-from pandas import read_csv, DataFrame
+from pandas import read_csv, DataFrame, to_datetime
+from pickle import load
 from typing import Union, Tuple, List
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.config import RawFeatures
+from src.config import RawFeatures, AlivePlot_Params
 
 
 def datetime_formatting(
@@ -82,6 +83,12 @@ def get_customer_history_data(
         RawFeatures.recency,
         RawFeatures.T,
     ]
+    with open("./data/metadata_stats.pkl", "rb") as f:
+        metadata_stats = load(f)
+    f.close()
+    df_[RawFeatures.DATE_T] = (df_[RawFeatures.T] - T_).apply(
+        lambda x: metadata_stats.last_transac_date + timedelta(days=x)
+    )
     return T_, df_
 
 
@@ -91,6 +98,17 @@ def get_customer_whatif_data(
     n_period: int,
     T_future_transac: int,
 ) -> Tuple[int, DataFrame]:
+    """Get customer data in a what-if context
+
+    Args:
+        data_summary (DataFrame): _description_
+        customer_id (Union[int, float, str]): _description_
+        n_period (int): _description_
+        T_future_transac (int): _description_
+
+    Returns:
+        Tuple[int, DataFrame]: _description_
+    """
     assert (
         T_future_transac <= n_period
     ), "Future \
@@ -98,8 +116,8 @@ def get_customer_whatif_data(
     T_, history_ = get_customer_history_data(
         data_summary, customer_id, n_period
     )
-    new_transac_time = history_[history_["T"] == T_].index.values[0] +\
-        T_future_transac
+    new_transac_time = history_[
+        history_[RawFeatures.T] == T_].index.values[0] + T_future_transac
     history_[RawFeatures.frequency].iloc[new_transac_time:] += 1
     history_[RawFeatures.recency].iloc[new_transac_time:] = (
         history_[RawFeatures.T].iloc[new_transac_time] - 0.01
@@ -124,56 +142,55 @@ def color_features(color: str, alpha: float) -> List[str]:
     ]
 
 
-def plot_(
-    customer_id,
-    customer_history,
-    T_,
-    p_alive_xarray,
-    status_study_time_color,
-    max_p_alive_,
-    min_p_alive_,
-    fig_dim,
-    *args,
-) -> None:
+def _plot_probability_alive(params: AlivePlot_Params, *args) -> None:
+    with open("./data/metadata_stats.pkl", "rb") as f:
+        metadata_stats = load(f)
+    f.close()
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
-            x=customer_history[RawFeatures.T],
-            y=p_alive_xarray.mean(("draw", "chain")),
+            x=params.customer_history[RawFeatures.DATE_T],
+            y=params.p_alive_xarray.mean(("draw", "chain")),
             line_shape="spline",
-            line=dict(color=color_features(status_study_time_color, 0.4)[0]),
+            line=dict(
+                color=color_features(params.status_study_time_color, 0.4)[0]
+            ),
             name="alive probability",
         )
     )
     fig.add_trace(
         go.Scatter(
-            x=list(customer_history[RawFeatures.T])
-            + list(customer_history[RawFeatures.T][::-1]),
-            y=list(max_p_alive_) + list(min_p_alive_[::-1]),
+            x=list(params.customer_history[RawFeatures.DATE_T])
+            + list(params.customer_history[RawFeatures.DATE_T][::-1]),
+            y=list(params.max_p_alive_) + list(params.min_p_alive_[::-1]),
             fill="toself",
             hoverinfo="skip",
             showlegend=False,
             line_shape="spline",
-            fillcolor=color_features(status_study_time_color, 0.4)[1],
-            line=dict(color=color_features(status_study_time_color, 0.4)[2]),
+            fillcolor=color_features(params.status_study_time_color, 0.4)[1],
+            line=dict(
+                color=color_features(params.status_study_time_color, 0.4)[2]
+            ),
         )
     )
     fig.update_layout(
         xaxis_title="T",
         yaxis_title="probability",
-        title=f"Probability Customer {customer_id} will purchase again",
-        width=fig_dim[0],
-        height=fig_dim[1],
+        title=f"Probability Customer {params.customer_id} will purchase again",
+        width=params.fig_dim[0],
+        height=params.fig_dim[1],
     )
     fig.add_vline(
-        x=T_,
+        x=to_datetime(metadata_stats.last_transac_date).timestamp()*1000,
         line_width=3,
         line_dash="dash",
         line_color="red",
         annotation_text="Instant t",
     )
     fig.add_vline(
-        x=customer_history[RawFeatures.recency].iloc[0],
+        x=to_datetime(
+            params.customer_history[RawFeatures.DATE_T].iloc[1]
+        ).timestamp()*1000,
         line_width=3,
         line_dash="dash",
         line_color="black",
@@ -181,7 +198,9 @@ def plot_(
     )
     if args:
         fig.add_vline(
-            x=customer_history[RawFeatures.recency].iloc[-1],
+            x=to_datetime(params.customer_history[
+                RawFeatures.DATE_T
+            ].iloc[-params.idx_next_transac]).timestamp()*1000,
             line_width=3,
             line_dash="dash",
             line_color="black",

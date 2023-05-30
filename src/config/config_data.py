@@ -1,7 +1,7 @@
-from datetime import date
 from dataclasses import dataclass, field
+from datetime import date
 from pandas import DataFrame
-from typing import Union, List
+from typing import Union, List, Any
 
 
 @dataclass
@@ -14,6 +14,7 @@ class RawFeatures:
     frequency: str = "frequency"
     recency: str = "recency"
     T: str = "T"
+    DATE_T: str = "date_T"
     monetary: str = "monetary_value"
 
 
@@ -39,3 +40,16 @@ class RFM_Features:
     max_recency: List[Union[int, float]] = field(default_factory=list)
     max_T: List[Union[int, float]] = field(default_factory=list)
     date_last_purchase: List[date] = field(default_factory=list)
+
+
+@dataclass
+class AlivePlot_Params:
+    customer_id: Union[int, float, str]
+    customer_history: DataFrame
+    T_: int
+    p_alive_xarray: Any
+    status_study_time_color: str
+    idx_next_transac: int
+    max_p_alive_: List[float]
+    min_p_alive_: List[float]
+    fig_dim: List[int]

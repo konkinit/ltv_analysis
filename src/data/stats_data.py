@@ -1,6 +1,7 @@
 import os
 import sys
 from pandas import DataFrame
+from pickle import dump
 from typing import Tuple
 
 if os.getcwd() not in sys.path:
@@ -33,7 +34,7 @@ class Statistics:
             .describe()
             .iloc[[0, 1, 3, 5, 7], :]
         )
-        return Metadata_Features(
+        _metadata_stats = Metadata_Features(
             n_distinct_custumers,
             n_vars,
             n_transactions,
@@ -41,6 +42,10 @@ class Statistics:
             last_transac_date,
             df_desc_qty_price,
         )
+        with open("./data/metadata_stats.pkl", "wb") as f:
+            dump(_metadata_stats, f)
+        f.close()
+        return _metadata_stats
 
     def rfm_data_stats(self) -> Tuple[int, DataFrame]:
         return (

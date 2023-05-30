@@ -11,9 +11,11 @@ from typing import Any, Tuple, List, Union
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.config import RawFeatures
+from src.config import RawFeatures, AlivePlot_Params
 from src.utils import (
-    get_customer_history_data, get_customer_whatif_data, plot_
+    get_customer_history_data,
+    get_customer_whatif_data,
+    _plot_probability_alive
 )
 
 
@@ -88,17 +90,21 @@ class BetaGeoModel(BetaGeoModel):
             if alive_p_study_time > 0.4
             else "red"
         )
-        plot_(
-            customer_id,
-            customer_history,
-            T_,
-            p_alive_xarray,
-            status_study_time_color,
-            max_p_alive_,
-            min_p_alive_,
-            fig_dim,
-            args,
-        )
+        if args:
+            idx_next_transac = n_period - args[0] + 1
+            plot_params = AlivePlot_Params(
+                customer_id, customer_history, T_, p_alive_xarray,
+                status_study_time_color, idx_next_transac, max_p_alive_,
+                min_p_alive_, fig_dim
+            )
+            _plot_probability_alive(plot_params, args[0])
+        else:
+            plot_params = AlivePlot_Params(
+                customer_id, customer_history, T_, p_alive_xarray,
+                status_study_time_color, 0, max_p_alive_,
+                min_p_alive_, fig_dim
+            )
+            _plot_probability_alive(plot_params)
 
     def global_plots_(
         self,
