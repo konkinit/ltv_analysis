@@ -51,15 +51,17 @@ calibration_end_dt = st.text_input(
     'Choose a date marking the calibaration end',
     placeholder="2011-06-30",
     max_chars=10,
-    help="The typed date must be in type YYYY-MM-DD"
+    help="The entered date must be in type YYYY-MM-DD"
 )
 
-processing_params = DataProcessingFeatures(
-    df_transaction.copy(),
-    study_freq,
-    calibration_end_dt
-)
-rfm_data = ProcessData(processing_params).model_data()
+
+rfm_data = ProcessData(
+    DataProcessingFeatures(
+        df_transaction.copy(),
+        study_freq,
+        calibration_end_dt
+    )
+).model_data()
 rfm_data_stats = Statistics(rfm_data).rfm_data_stats()
 
 st.markdown(
@@ -80,7 +82,7 @@ colM.metric("Monetary", f"\
 colT.metric(
     "Age",
     f"{rfm_data[RawFeatures().T].mean().round(2)} \
-        {processing_params.study_freq}"
+        {study_freq}"
 )
 st.dataframe(
     data=rfm_data.head(),
@@ -88,6 +90,6 @@ st.dataframe(
 )
 
 
-@st.cache_data
-def get_rfm_data():
-    return rfm_data.stocks()
+st.session_state["rfm_data"] = rfm_data
+st.session_state["study_freq"] = study_freq
+st.session_state["calibration_end_dt"] = calibration_end_dt

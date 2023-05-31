@@ -5,11 +5,21 @@ from datetime import datetime, timedelta
 from numpy import full, arange
 import plotly.graph_objects as go
 from pandas import read_csv, DataFrame, to_datetime
-from pickle import load
 from typing import Union, Tuple, List
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.config import RawFeatures, AlivePlot_Params
+from src.config import RawFeatures, AlivePlot_Params, Metadata_Features
+
+
+_freq_dict = {
+    "D": "days",
+    "W": "weeks"
+}
+_color = {
+    "green": (0, 238, 0),
+    "yellow": (205, 205, 0),
+    "red": (255, 0, 0)
+}
 
 
 def datetime_formatting(
@@ -49,7 +59,6 @@ def import_from_S3(
         secret=access_key,
         token=token,
     )
-
     return read_csv(
         fs.open(f"{bucket}/{path}/online_retail_data.csv"),
         encoding="unicode_escape"
@@ -62,6 +71,8 @@ def import_from_local(path) -> DataFrame:
 
 def get_customer_history_data(
     data_summary: DataFrame,
+    metadata_stats: Metadata_Features,
+    freq: str,
     customer_id: Union[int, float, str],
     n_period_: int
 ) -> Tuple[int, DataFrame]:
@@ -83,17 +94,18 @@ def get_customer_history_data(
         RawFeatures.recency,
         RawFeatures.T,
     ]
-    with open("./data/metadata_stats.pkl", "rb") as f:
-        metadata_stats = load(f)
-    f.close()
     df_[RawFeatures.DATE_T] = (df_[RawFeatures.T] - T_).apply(
-        lambda x: metadata_stats.last_transac_date + timedelta(days=x)
+        lambda x: metadata_stats.last_transac_date + timedelta(
+            **{_freq_dict[freq]: x}
+        )
     )
     return T_, df_
 
 
 def get_customer_whatif_data(
     data_summary: DataFrame,
+    metadata_stats: Metadata_Features,
+    freq: str,
     customer_id: Union[int, float, str],
     n_period: int,
     T_future_transac: int,
@@ -114,7 +126,7 @@ def get_customer_whatif_data(
     ), "Future \
         transaction must be before the end of future window"
     T_, history_ = get_customer_history_data(
-        data_summary, customer_id, n_period
+        data_summary, metadata_stats, freq, customer_id, n_period
     )
     new_transac_time = history_[
         history_[RawFeatures.T] == T_].index.values[0] + T_future_transac
@@ -125,10 +137,15 @@ def get_customer_whatif_data(
     return T_, history_
 
 
-_color = {"green": (0, 238, 0), "yellow": (205, 205, 0), "red": (255, 0, 0)}
-
-
 def colorRGB(rgb_: Tuple[int], *args) -> Tuple[int]:
+    """Represent a color with if it exists an alpha params
+
+    Args:
+        rgb_ (Tuple[int]): RGB representation of a color
+
+    Returns:
+        Tuple[int]: RGB reprez plus alpha
+    """
     if args:
         return (rgb_[0], rgb_[1], rgb_[2], args[0])
     return rgb_
@@ -142,10 +159,11 @@ def color_features(color: str, alpha: float) -> List[str]:
     ]
 
 
-def _plot_probability_alive(params: AlivePlot_Params, *args) -> None:
-    with open("./data/metadata_stats.pkl", "rb") as f:
-        metadata_stats = load(f)
-    f.close()
+def _plot_probability_alive(
+        params: AlivePlot_Params,
+        metadata_stats: Metadata_Features,
+        *args
+) -> None:
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(

@@ -3,6 +3,7 @@ import sys
 from numpy import arange, meshgrid
 from pandas import DataFrame
 from plotly.express import imshow
+from plotly.graph_objects import Figure
 from pymc_marketing.clv import (
     BetaGeoModel,
 )
@@ -11,7 +12,7 @@ from typing import Any, Tuple, List, Union
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.config import RawFeatures, AlivePlot_Params
+from src.config import RawFeatures, AlivePlot_Params, Metadata_Features
 from src.utils import (
     get_customer_history_data,
     get_customer_whatif_data,
@@ -20,21 +21,32 @@ from src.utils import (
 
 
 class BetaGeoModel(BetaGeoModel):
-    def __init__(self, data: DataFrame) -> None:
+    def __init__(
+            self,
+            data: DataFrame,
+            freq: str,
+            metadata_stats: Metadata_Features
+    ) -> None:
         self.data = data.copy()
+        self.freq = freq
+        self.metadata_stats = metadata_stats
         super().__init__(
             customer_id=self.data.index,
-            frequency=self.data["frequency"],
-            recency=self.data["recency"],
-            T=self.data["T"],
+            frequency=self.data[RawFeatures.frequency],
+            recency=self.data[RawFeatures.recency],
+            T=self.data[RawFeatures.T],
             a_prior=HalfNormal.dist(10),
             b_prior=HalfNormal.dist(10),
             alpha_prior=HalfNormal.dist(10),
-            r_prior=HalfNormal.dist(10),
+            r_prior=HalfNormal.dist(10)
         )
 
     def fit_or_load_model(self):
         pass
+
+    def _fit_summary(self):
+        return self.fit_summary().reset_index(
+            drop=False).rename(columns={"index": "parameter"})
 
     def probability_alive_xarray(
         self, T_: int, customer_history: DataFrame
@@ -61,7 +73,10 @@ class BetaGeoModel(BetaGeoModel):
             self.probability_alive_xarray(T_, customer_history)
             .median(("draw", "chain"))
             .to_numpy()[
-                customer_history[customer_history["T"] == T_].index.values[0]]
+                customer_history[
+                    customer_history[RawFeatures.T] == T_
+                ].index.values[0]
+            ]
         )
 
     def plot_probability_alive(
@@ -72,9 +87,15 @@ class BetaGeoModel(BetaGeoModel):
         *args
     ) -> None:
         T_, customer_history = (
-            get_customer_whatif_data(self.data, customer_id, n_period, args[0])
+            get_customer_whatif_data(
+                self.data, self.metadata_stats, self.freq,
+                customer_id, n_period, args[0]
+            )
             if args
-            else get_customer_history_data(self.data, customer_id, n_period)
+            else get_customer_history_data(
+                self.data, self.metadata_stats, self.freq,
+                customer_id,  n_period
+            )
         )
         alive_p_study_time = self.probability_alive_study_instant(
             T_, customer_history
@@ -97,16 +118,16 @@ class BetaGeoModel(BetaGeoModel):
                 status_study_time_color, idx_next_transac, max_p_alive_,
                 min_p_alive_, fig_dim
             )
-            _plot_probability_alive(plot_params, args[0])
+            _plot_probability_alive(plot_params, self.metadata_stats, args[0])
         else:
             plot_params = AlivePlot_Params(
                 customer_id, customer_history, T_, p_alive_xarray,
                 status_study_time_color, 0, max_p_alive_,
                 min_p_alive_, fig_dim
             )
-            _plot_probability_alive(plot_params)
+            _plot_probability_alive(plot_params, self.metadata_stats)
 
-    def global_plots_(
+    def _global_plots(
         self,
         max_frequency=None,
         max_recency=None,
@@ -114,7 +135,7 @@ class BetaGeoModel(BetaGeoModel):
         xlabel="Customer's Historical Frequency",
         ylabel="Customer's Recency",
         **kwargs
-    ) -> None:
+    ) -> Figure:
         if max_frequency is None:
             max_frequency = int(self.frequency.max())
         if max_recency is None:
@@ -134,11 +155,14 @@ class BetaGeoModel(BetaGeoModel):
         )
         fig = imshow(
             Z,
-            labels={"color": "probability", "x": "frequency", "y": "recency"},
-            width=600,
-            height=700,
+            labels={
+                "color": "probability",
+                "x": RawFeatures.frequency,
+                "y": RawFeatures.recency
+            },
+            width=600, height=700,
         )
         fig.update_layout(
             xaxis_title=xlabel, yaxis_title=ylabel, title=title, autosize=True
         )
-        fig.show()
+        return fig

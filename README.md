@@ -9,7 +9,6 @@
 
 ## To Do
 
-- Change the `T` axis to an date axis
 - Build streamlit app
 
 ## Get started
@@ -25,5 +24,4 @@ together with the probability of a customer being alive.
 
 1. [“Counting Your Customers” the Easy Way: An Alternative to the Pareto/NBD Model](http://brucehardie.com/papers/018/fader_et_al_mksc_05.pdf)
 2. [pymc-marketing by PyMC Labs](https://www.pymc-marketing.io/en/stable/notebooks/clv/clv_quickstart.html)
-3. [What is Your Customer’s Worth Over Their Lifetime?](https://towardsdatascience.com/what-is-your-customers-worth-over-their-lifetime-dfae277fd166)
  
