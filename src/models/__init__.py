@@ -1,4 +1,4 @@
-from .bg_nbd import BetaGeoModel
+from .bg_nbd import _BetaGeoModel
 
 
-__all__ = ["BetaGeoModel"]
+__all__ = ["_BetaGeoModel"]

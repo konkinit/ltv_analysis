@@ -7,20 +7,25 @@ from src.data import getDataset, Statistics, ProcessData
 from src.config import RawFeatures, DataProcessingFeatures
 
 
-st.title("Metadata Statistics")
+st.markdown(
+    """
+    # Metadata Statistics
+
+    The following metrics and table describe the transaction \
+    dataset
+    """
+)
+
 
 df_transaction = getDataset()
 metadata_stats = Statistics(df_transaction).metadata_stats()
+st.session_state["metadata_stats"] = metadata_stats
 
-st.markdown(
-    "The following metrics and table describe the transaction \
-    dataset"
-)
 
 colCust, colTransac = st.columns(2)
-colCust.metric("# of Distinct customers", f"\
+colCust.metric("Number of Distinct customers", f"\
     {metadata_stats.n_distinct_customers}")
-colTransac.metric("# of Transactions", f"\
+colTransac.metric("Number of Transactions", f"\
     {metadata_stats.n_transactions}")
 
 colFTransac, colLTransac = st.columns(2)
@@ -43,7 +48,7 @@ st.markdown(
 
 study_freq = st.selectbox(
     "Choose a frequency to compute the RFM features",
-    ('D', 'W', 'M'),
+    options=('D', 'W', 'M'),
     help="D stands for Day, W for Week and M for Month"
 )
 

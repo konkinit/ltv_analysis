@@ -20,7 +20,7 @@ from src.utils import (
 )
 
 
-class BetaGeoModel(BetaGeoModel):
+class _BetaGeoModel(BetaGeoModel):
     def __init__(
             self,
             data: DataFrame,
@@ -45,8 +45,9 @@ class BetaGeoModel(BetaGeoModel):
         pass
 
     def _fit_summary(self):
-        return self.fit_summary().reset_index(
-            drop=False).rename(columns={"index": "parameter"})
+        return self.fit_summary().reset_index(drop=False).rename(
+            columns={"index": "parameter"}
+        )
 
     def probability_alive_xarray(
         self, T_: int, customer_history: DataFrame
