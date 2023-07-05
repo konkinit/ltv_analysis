@@ -121,7 +121,7 @@ def get_customer_last_transac_to_future_data(
         RawFeatures.CUSTOMER_ID,
         RawFeatures.frequency,
         RawFeatures.recency,
-        RawFeatures.T,
+        RawFeatures.T
     ]
     df_[RawFeatures.DATE_T] = (df_[RawFeatures.T] - T_).apply(
         lambda x: metadata_stats.last_transac_date + timedelta(

@@ -7,9 +7,6 @@
     Analyse and model customer lifetime value in a non-contractual business
 </p>
 
-## To Do
-
-- Build streamlit app
 
 ## Get started
 

@@ -5,7 +5,7 @@ import streamlit as st
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.utils import (
-    get_customer_history_data, get_customer_whatif_data
+    get_customer_last_transac_to_future_data
 )
 
 
@@ -26,32 +26,26 @@ customer_id = st.selectbox(
 )
 n_period = st.number_input(
     "Enter the number of period in the future for prediction",
-    min_value=1
+    min_value=2
 )
+perform_what_if = st.checkbox("Perform a what-if analysis")
 time_future_transac = st.number_input(
     "Enter the number of period in the future after which the customer\
     realises a transaction",
-    value=None,
+    value=0,
+    max_value=n_period,
+    label_visibility="collapsed",
     help="If a what-if scenario is not desired, let the value to `None`"
 )
 
+if not perform_what_if:
+    time_future_transac = None
 
-if time_future_transac:
-    assert time_future_transac <= n_period
 
-
-T_, customer_history = (
-    get_customer_whatif_data(
-        betageo_model.data, betageo_model.metadata_stats,
-        betageo_model.freq,
-        customer_id, n_period, time_future_transac
-    )
-    if time_future_transac
-    else get_customer_history_data(
-        betageo_model.data, betageo_model.metadata_stats,
-        betageo_model.freq,
-        customer_id,  n_period
-    )
+T_, customer_history = get_customer_last_transac_to_future_data(
+    betageo_model.data, betageo_model.metadata_stats,
+    betageo_model.freq,
+    customer_id, n_period, time_future_transac
 )
 p_alive_now = betageo_model.probability_alive_study_instant(
     T_, customer_history
