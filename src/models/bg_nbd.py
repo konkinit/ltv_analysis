@@ -116,7 +116,7 @@ class _BetaGeoModel(BetaGeoModel):
         customer_id: Union[float, int, str],
         n_period: int,
         time_future_transac: int = None,
-        fig_dim: List[int] = [1500, 700]
+        fig_dim: List[int] = [1200, 700]
     ) -> Figure:
         """Predict customer's future behaviour and
         Plot alive probability from the last transaction to the

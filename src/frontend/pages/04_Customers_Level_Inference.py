@@ -4,14 +4,15 @@ import streamlit as st
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.utils import (
-    get_customer_last_transac_to_future_data
-)
+from src.utils import get_customer_last_transac_to_future_data
 
 
 st.markdown(
     r"""
     # Inference on Customer Level
+
+    This poage is designed to highlight customers' metrics obtained
+    from modeling.
     """
 )
 
@@ -50,8 +51,9 @@ T_, customer_history = get_customer_last_transac_to_future_data(
 p_alive_now = betageo_model.probability_alive_study_instant(
     T_, customer_history
 )
+
 fig = betageo_model.plot_probability_alive(
-    customer_id,
+    float(customer_id),
     n_period,
     time_future_transac
 )

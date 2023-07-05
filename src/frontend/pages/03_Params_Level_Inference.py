@@ -46,6 +46,9 @@ betageo_model.fit()
 df_betageo_model_params = betageo_model._fit_summary()
 
 
+st.session_state["betageo_model"] = betageo_model
+
+
 col_a, col_b, col_alpha, col_r = st.columns(4)
 col_a.metric(
     "$a$", f"{df_betageo_model_params.iloc[0, 1]}"
@@ -56,12 +59,10 @@ col_b.metric(
 col_alpha.metric(
     r"$\alpha$", f"{df_betageo_model_params.iloc[2, 1]}"
 )
-col_b.metric(
+col_r.metric(
     "$r$", f"{df_betageo_model_params.iloc[3, 1]}"
 )
 
 st.plotly_chart(
     betageo_model._global_plots()
 )
-
-st.session_state["betageo_model"] = betageo_model

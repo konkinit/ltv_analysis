@@ -8,6 +8,11 @@
 </p>
 
 
+## To-Do
+
+- Enrich Customer Level Inference
+
+
 ## Get started
 
 

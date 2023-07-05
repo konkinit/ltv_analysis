@@ -123,8 +123,15 @@ def get_customer_last_transac_to_future_data(
         RawFeatures.recency,
         RawFeatures.T
     ]
+    if type(metadata_stats.last_transac_date) == str:
+        _last_transac_date = datetime.strptime(
+            metadata_stats.last_transac_date,
+            "%Y-%m-%d %H:%M"
+        )
+    else:
+        _last_transac_date = metadata_stats.last_transac_date
     df_[RawFeatures.DATE_T] = (df_[RawFeatures.T] - T_).apply(
-        lambda x: metadata_stats.last_transac_date + timedelta(
+        lambda x: _last_transac_date + timedelta(
             **{_freq_dict[freq]: x}
         )
     )
