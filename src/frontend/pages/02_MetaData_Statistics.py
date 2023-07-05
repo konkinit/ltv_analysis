@@ -22,6 +22,8 @@ st.markdown(
 
 df_transaction = getDataset()
 metadata_stats = Statistics(df_transaction).metadata_stats()
+
+
 st.session_state["metadata_stats"] = metadata_stats
 
 
@@ -99,5 +101,8 @@ st.dataframe(
 
 
 st.session_state["rfm_data"] = rfm_data
+st.session_state["list_cohort_customers"] = list(
+    rfm_data.reset_index().iloc[:, 0].unique()
+)
 st.session_state["study_freq"] = study_freq
 st.session_state["calibration_end_dt"] = calibration_end_dt

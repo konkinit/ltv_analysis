@@ -5,8 +5,7 @@ from .utils import (
     datetime_formatting,
     import_from_local,
     import_from_S3,
-    get_customer_history_data,
-    get_customer_whatif_data,
+    get_customer_last_transac_to_future_data,
     color_features,
     _plot_probability_alive,
 )
@@ -19,8 +18,7 @@ __all__ = [
     "bg_nbd",
     "import_from_local",
     "import_from_S3",
-    "get_customer_history_data",
-    "get_customer_whatif_data",
+    "get_customer_last_transac_to_future_data",
     "color_features",
     "_plot_probability_alive",
 ]

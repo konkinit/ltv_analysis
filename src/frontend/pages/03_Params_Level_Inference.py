@@ -16,13 +16,13 @@ st.markdown(
 
     ### Model assumptions and parameters
     The `BG/NBD` model is based on the following five assumptions:
-    - While active, the number of transactions made by a customer \
+    - While active, the number of transactions made by a customer
     follows a Poisson process with transaction rate $\lambda$ ;
     - Heterogeneity in $\lambda$ follows a gamma distribution ;
-    - After any transaction, a customer becomes inactive with \
+    - After any transaction, a customer becomes inactive with
     probability $p$ ;
     - Heterogeneity in $p$ follows a beta distribution ;
-    - The transaction rate $\lambda$ and the dropout probability $p$ vary \
+    - The transaction rate $\lambda$ and the dropout probability $p$ vary
     independently across customers ;
     """
 )

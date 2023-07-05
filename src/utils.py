@@ -28,6 +28,21 @@ def datetime_formatting(
     input_dt_format: str = "%d/%m/%Y %H:%M",
     output_dt_format: str = "%Y-%m-%d %H:%M",
 ) -> DataFrame:
+    """Format a date colum in a dateframe in order to match
+    the lifetime package requirements
+
+    Args:
+        df_transaction_ (DataFrame): raw transactionnal dataframe
+        flag (bool, optional): flag to void formatting in case the date
+        feature is in correct format. Defaults to False.
+        input_dt_format (_type_, optional): input date format.
+        Defaults to "%d/%m/%Y %H:%M".
+        output_dt_format (_type_, optional): output date format.
+        Defaults to "%Y-%m-%d %H:%M".
+
+    Returns:
+        DataFrame: _description_
+    """
     df_transaction = df_transaction_.copy()
     if flag:
         return df_transaction
@@ -69,12 +84,13 @@ def import_from_local(path) -> DataFrame:
     return read_csv(path, encoding="unicode_escape").set_index("Customer_ID")
 
 
-def get_customer_history_data(
+def get_customer_last_transac_to_future_data(
     data_summary: DataFrame,
     metadata_stats: Metadata_Features,
     freq: str,
     customer_id: Union[int, float, str],
-    n_period_: int
+    n_period_: int,
+    T_future_transac: int = None
 ) -> Tuple[int, DataFrame]:
     """Get customer RFM history data
 
@@ -112,45 +128,15 @@ def get_customer_history_data(
             **{_freq_dict[freq]: x}
         )
     )
+    if T_future_transac:
+        new_transac_time = df_[
+            df_[RawFeatures.T] == T_].index.values[0] + T_future_transac
+        df_[RawFeatures.frequency].iloc[new_transac_time:] += 1
+        df_[RawFeatures.recency].iloc[new_transac_time:] = (
+            df_[RawFeatures.T].iloc[new_transac_time] - 0.01
+        )
+        return T_, df_
     return T_, df_
-
-
-def get_customer_whatif_data(
-    data_summary: DataFrame,
-    metadata_stats: Metadata_Features,
-    freq: str,
-    customer_id: Union[int, float, str],
-    n_period: int,
-    T_future_transac: int,
-) -> Tuple[int, DataFrame]:
-    """Get customer data in a what-if scenario
-
-    Args:
-        data_summary (DataFrame): RFM data
-        metadata_stats (Metadata_Features): metadata statistics
-        freq (str): time frequency
-        customer_id (Union[int, float, str]): customer id
-        n_period (int): number of freq
-        T_future_transac (int): instant of transaction in the future
-
-    Returns:
-        Tuple[int, DataFrame]: a tuple composed of customer age and
-        his RFM data history
-    """
-    assert (
-        T_future_transac <= n_period
-    ), "Future \
-        transaction must be before the end of future window"
-    T_, history_ = get_customer_history_data(
-        data_summary, metadata_stats, freq, customer_id, n_period
-    )
-    new_transac_time = history_[
-        history_[RawFeatures.T] == T_].index.values[0] + T_future_transac
-    history_[RawFeatures.frequency].iloc[new_transac_time:] += 1
-    history_[RawFeatures.recency].iloc[new_transac_time:] = (
-        history_[RawFeatures.T].iloc[new_transac_time] - 0.01
-    )
-    return T_, history_
 
 
 def colorRGB(rgb_: Tuple[int], *args) -> Tuple[int]:
