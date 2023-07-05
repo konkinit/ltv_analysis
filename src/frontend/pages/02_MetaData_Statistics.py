@@ -7,15 +7,18 @@ from src.data import getDataset, Statistics, ProcessData
 from src.config import RawFeatures, DataProcessingFeatures
 
 
+year = st.session_state["year_adhesion"]
+quarter = st.session_state["quarter_adhesion"]
+
+
 st.markdown(
     """
     # Metadata Statistics
 
     The following metrics and table describe the transaction \
-    dataset
+    data of the cohort:
     """
 )
-
 
 df_transaction = getDataset()
 metadata_stats = Statistics(df_transaction).metadata_stats()

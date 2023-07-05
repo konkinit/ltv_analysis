@@ -51,7 +51,7 @@ def import_from_S3(
     token: str
 ) -> DataFrame:
     """
-    Connect to anS3 bucket and get data
+    Connect to an S3 bucket and get data
     """
     fs = s3fs.S3FileSystem(
         client_kwargs={"endpoint_url": endpoint},
@@ -76,6 +76,19 @@ def get_customer_history_data(
     customer_id: Union[int, float, str],
     n_period_: int
 ) -> Tuple[int, DataFrame]:
+    """Get customer RFM history data
+
+    Args:
+        data_summary (DataFrame): RFM data
+        metadata_stats (Metadata_Features): metadata statistics
+        freq (str): time frequency
+        customer_id (Union[int, float, str]): customer id
+        n_period (int): number of freq
+
+    Returns:
+        Tuple[int, DataFrame]: a tuple composed of customer age and
+        his RFM data history
+    """
     T_ = int(data_summary.loc[customer_id][RawFeatures.T])
     frequency_ = int(data_summary.loc[customer_id][RawFeatures.frequency])
     recency_ = int(data_summary.loc[customer_id][RawFeatures.recency])
@@ -110,16 +123,19 @@ def get_customer_whatif_data(
     n_period: int,
     T_future_transac: int,
 ) -> Tuple[int, DataFrame]:
-    """Get customer data in a what-if context
+    """Get customer data in a what-if scenario
 
     Args:
-        data_summary (DataFrame): _description_
-        customer_id (Union[int, float, str]): _description_
-        n_period (int): _description_
-        T_future_transac (int): _description_
+        data_summary (DataFrame): RFM data
+        metadata_stats (Metadata_Features): metadata statistics
+        freq (str): time frequency
+        customer_id (Union[int, float, str]): customer id
+        n_period (int): number of freq
+        T_future_transac (int): instant of transaction in the future
 
     Returns:
-        Tuple[int, DataFrame]: _description_
+        Tuple[int, DataFrame]: a tuple composed of customer age and
+        his RFM data history
     """
     assert (
         T_future_transac <= n_period
@@ -163,7 +179,7 @@ def _plot_probability_alive(
         params: AlivePlot_Params,
         metadata_stats: Metadata_Features,
         *args
-) -> None:
+) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -224,4 +240,4 @@ def _plot_probability_alive(
             line_color="black",
             annotation_text="Purchase",
         )
-    fig.show()
+    return fig

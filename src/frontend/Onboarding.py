@@ -16,7 +16,7 @@ st.markdown(
 
     ## Fader et al.'s approach overview
 
-    >Today’s managers are very interested in predicting the future purchasing\
+    >Today's managers are very interested in predicting the future purchasing\
      patterns of their customers, which can then serve as an input into \
     “lifetime value” calculations. Among the models that provide such \
     capabilities, the Pareto/NBD “counting your customers” framework proposed \

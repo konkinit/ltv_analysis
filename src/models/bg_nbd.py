@@ -86,7 +86,7 @@ class _BetaGeoModel(BetaGeoModel):
         n_period: int,
         fig_dim: List[int],
         *args
-    ) -> None:
+    ) -> Figure:
         T_, customer_history = (
             get_customer_whatif_data(
                 self.data, self.metadata_stats, self.freq,
@@ -119,14 +119,16 @@ class _BetaGeoModel(BetaGeoModel):
                 status_study_time_color, idx_next_transac, max_p_alive_,
                 min_p_alive_, fig_dim
             )
-            _plot_probability_alive(plot_params, self.metadata_stats, args[0])
+            return _plot_probability_alive(
+                plot_params, self.metadata_stats, args[0]
+            )
         else:
             plot_params = AlivePlot_Params(
                 customer_id, customer_history, T_, p_alive_xarray,
                 status_study_time_color, 0, max_p_alive_,
                 min_p_alive_, fig_dim
             )
-            _plot_probability_alive(plot_params, self.metadata_stats)
+            return _plot_probability_alive(plot_params, self.metadata_stats)
 
     def _global_plots(
         self,
@@ -137,12 +139,28 @@ class _BetaGeoModel(BetaGeoModel):
         ylabel="Customer's Recency",
         **kwargs
     ) -> Figure:
+        """Produce recency X frequency heatmap
+
+        Args:
+            max_frequency (_type_, optional): maximum value of frequency.
+            Defaults to None.
+            max_recency (_type_, optional): maximum value of recency.
+            Defaults to None.
+            title (str, optional): figure title.
+            Defaults to "Probability Customer is Alive".
+            xlabel (str, optional): x axis label.
+            Defaults to "Customer's Historical Frequency".
+            ylabel (str, optional): y axis label.
+            Defaults to "Customer's Recency".
+
+        Returns:
+            Figure: heat map figure object
+        """
         if max_frequency is None:
             max_frequency = int(self.frequency.max())
         if max_recency is None:
             max_recency = int(self.recency.max())
-        frequency = arange(max_frequency + 1)
-        recency = arange(max_recency + 1)
+        frequency, recency = arange(max_frequency + 1), arange(max_recency + 1)
         mesh_frequency, mesh_recency = meshgrid(frequency, recency)
         Z = (
             self.expected_probability_alive(

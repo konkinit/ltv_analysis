@@ -11,7 +11,7 @@ st.title("Customer LifeTime Value Modeling")
 
 
 st.markdown(
-    """
+    r"""
     ## Theoretical formulation
 
     ### Model assumptions and parameters
@@ -32,7 +32,7 @@ st.markdown(
     """
     ### Parameters Inference and Interpretation
 
-    After simulation , 
+    After simulation ,
     """
 )
 
@@ -40,13 +40,24 @@ rfm_data = st.session_state["rfm_data"]
 study_freq = st.session_state["study_freq"]
 metadata_stats = st.session_state["metadata_stats"]
 
+
 betageo_model = _BetaGeoModel(rfm_data, study_freq, metadata_stats)
 betageo_model.fit()
 df_betageo_model_params = betageo_model._fit_summary()
 
-st.dataframe(
-    data=df_betageo_model_params.iloc[:, :5],
-    use_container_width=True
+
+col_a, col_b, col_alpha, col_r = st.columns(4)
+col_a.metric(
+    "$a$", f"{df_betageo_model_params.iloc[0, 1]}"
+)
+col_b.metric(
+    "$b$", f"{df_betageo_model_params.iloc[1, 1]}"
+)
+col_alpha.metric(
+    r"$\alpha$", f"{df_betageo_model_params.iloc[2, 1]}"
+)
+col_b.metric(
+    "$r$", f"{df_betageo_model_params.iloc[3, 1]}"
 )
 
 st.plotly_chart(
