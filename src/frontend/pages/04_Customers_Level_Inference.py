@@ -4,7 +4,7 @@ import streamlit as st
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
-from src.utils import get_customer_last_transac_to_future_data
+from src.data import Customer
 
 
 st.markdown(
@@ -19,7 +19,7 @@ st.markdown(
 
 betageo_model = st.session_state["betageo_model"]
 list_cohort_customers = st.session_state["list_cohort_customers"]
-
+freq = betageo_model.freq
 
 customer_id = st.selectbox(
     'For more insights on a customer, choose his ID',
@@ -42,21 +42,30 @@ time_future_transac = st.number_input(
 if not perform_what_if:
     time_future_transac = None
 
-
-T_, customer_history = get_customer_last_transac_to_future_data(
-    betageo_model.data, betageo_model.metadata_stats,
-    betageo_model.freq,
-    customer_id, n_period, time_future_transac
-)
-p_alive_now = betageo_model.probability_alive_study_instant(
-    T_, customer_history
-)
-
+customer = Customer(customer_id)
 fig = betageo_model.plot_probability_alive(
-    float(customer_id),
+    customer,
     n_period,
     time_future_transac
 )
+
+col_id, col_alive_proba, col_recency, col_frequency, col_age = st.columns(5)
+col_id.metric(
+    "Customer ID", f"{customer.id}"
+)
+col_alive_proba.metric(
+    "Alive Probability", f"{customer.alive_probability.round(3)}"
+)
+col_recency.metric(
+    "Recency", f"{customer.recency} {freq}"
+)
+col_frequency.metric(
+    "Frequency", f"{customer.frequency}"
+)
+col_age.metric(
+    "Age", f"{customer.T} {freq}"
+)
+
 st.plotly_chart(
     fig
 )

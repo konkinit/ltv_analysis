@@ -8,13 +8,13 @@ from pymc_marketing.clv import (
     BetaGeoModel,
 )
 from pymc import HalfNormal
-from typing import Any, Tuple, List, Union
+from typing import Any, Tuple, List
 
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
+from src.data import Customer
 from src.config import RawFeatures, AlivePlot_Params, Metadata_Features
 from src.utils import (
-    get_customer_last_transac_to_future_data,
     _plot_probability_alive
 )
 
@@ -54,12 +54,11 @@ class _BetaGeoModel(BetaGeoModel):
         )
 
     def probability_alive_xarray(
-        self, T_: int, customer_history: DataFrame
+        self, customer_history: DataFrame
     ) -> Tuple[float, float, Any]:
         """Derive the alive probabilities during customer lifetime
 
         Args:
-            T_ (int): customer age
             customer_history (DataFrame): customer RFM history data
 
         Returns:
@@ -73,7 +72,7 @@ class _BetaGeoModel(BetaGeoModel):
         )
 
     def probability_alive_features(
-        self, T_: int, customer_history: DataFrame
+        self, customer_history: DataFrame
     ) -> Tuple[float, float]:
         """Get customer alive probabilities bundaries
 
@@ -84,13 +83,13 @@ class _BetaGeoModel(BetaGeoModel):
         Returns:
             Tuple[float, float]: min and max of customer's alive probabilities
         """
-        p_alive_xarray = self.probability_alive_xarray(T_, customer_history)
+        p_alive_xarray = self.probability_alive_xarray(customer_history)
         min_p_alive_ = p_alive_xarray.to_numpy().min(axis=0).min(axis=0)
         max_p_alive_ = p_alive_xarray.to_numpy().max(axis=0).max(axis=0)
         return (min_p_alive_, max_p_alive_)
 
     def probability_alive_study_instant(
-        self, T_: int, customer_history: DataFrame
+        self, customer_: Customer,
     ) -> float:
         """Get the alive probability at the study time
 
@@ -101,19 +100,25 @@ class _BetaGeoModel(BetaGeoModel):
         Returns:
             float: alive probability at the moment
         """
-        return (
-            self.probability_alive_xarray(T_, customer_history)
-            .median(("draw", "chain"))
+        rfm_data_from_last = customer_.rfm_data_from_last(
+            self.data, self.metadata_stats, self.freq,
+            3, None
+        )
+        p = (
+            self.probability_alive_xarray(rfm_data_from_last)
+            .mean(("draw", "chain"))
             .to_numpy()[
-                customer_history[
-                    customer_history[RawFeatures.T] == T_
+                rfm_data_from_last[
+                    rfm_data_from_last[RawFeatures.T] == customer_.T
                 ].index.values[0]
             ]
         )
+        customer_.alive_probability = p
+        return p
 
     def plot_probability_alive(
         self,
-        customer_id: Union[float, int, str],
+        customer_: Customer,
         n_period: int,
         time_future_transac: int = None,
         fig_dim: List[int] = [1200, 700]
@@ -132,16 +137,16 @@ class _BetaGeoModel(BetaGeoModel):
         Returns:
             Figure: figure object
         """
-        T_, customer_history = get_customer_last_transac_to_future_data(
+        rfm_data_from_last = customer_.rfm_data_from_last(
             self.data, self.metadata_stats, self.freq,
-            customer_id, n_period, time_future_transac
+            n_period, time_future_transac
         )
         alive_p_study_time = self.probability_alive_study_instant(
-            T_, customer_history
+            customer_
         )
-        p_alive_xarray = self.probability_alive_xarray(T_, customer_history)
+        p_alive_xarray = self.probability_alive_xarray(rfm_data_from_last)
         (min_p_alive_, max_p_alive_) = self.probability_alive_features(
-            T_, customer_history
+            rfm_data_from_last
         )
         status_study_time_color = (
             "green"
@@ -153,7 +158,7 @@ class _BetaGeoModel(BetaGeoModel):
         if time_future_transac:
             idx_next_transac = n_period - time_future_transac + 1
             plot_params = AlivePlot_Params(
-                customer_id, customer_history, T_, p_alive_xarray,
+                customer_.id, rfm_data_from_last, customer_.T, p_alive_xarray,
                 status_study_time_color, idx_next_transac, max_p_alive_,
                 min_p_alive_, fig_dim
             )
@@ -162,7 +167,7 @@ class _BetaGeoModel(BetaGeoModel):
             )
         else:
             plot_params = AlivePlot_Params(
-                customer_id, customer_history, T_, p_alive_xarray,
+                customer_.id, rfm_data_from_last, customer_.T, p_alive_xarray,
                 status_study_time_color, 0, max_p_alive_,
                 min_p_alive_, fig_dim
             )
