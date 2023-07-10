@@ -13,6 +13,7 @@ dict_cohort = {
         f"Q{i}" for i in range(1, 1+ceil((date.today().month)/3))
     ]
 }
+list_status = ["Silver", "Gold", "Platinum"]
 
 
 st.markdown(
@@ -37,7 +38,12 @@ quarter = st.selectbox(
     'Select the quarter of adhesion',
     dict_cohort[year]
 )
+status = st.selectbox(
+    'Select the cohort status',
+    list_status
+)
 
 
 st.session_state["year_adhesion"] = year
 st.session_state["quarter_adhesion"] = quarter
+st.session_state["status"] = status

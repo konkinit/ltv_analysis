@@ -24,6 +24,7 @@ class Customer:
         self.T = 0
         self.frequency = 0
         self.recency = 0
+        self.monetary = 0.0
         self.alive_probability = 0.0
 
     def rfm_data(
@@ -42,6 +43,9 @@ class Customer:
             gloabl_rfm_data.loc[self.id][RawFeatures.frequency]
         )
         self.recency = int(gloabl_rfm_data.loc[self.id][RawFeatures.recency])
+        self.monetary = float(
+            gloabl_rfm_data.loc[self.id][RawFeatures.monetary]
+        )
         return gloabl_rfm_data.loc[self.id]
 
     def rfm_data_from_last(

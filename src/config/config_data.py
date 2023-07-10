@@ -1,7 +1,32 @@
+import os
+import sys
 from dataclasses import dataclass, field
 from datetime import date
+from json import load
 from pandas import DataFrame
 from typing import Union, List, Any
+
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
+
+
+tokens_path = "data/tokens.json"
+token_file_present = False
+if os.path.isfile(os.path.join(tokens_path)):
+    with open(f"./{tokens_path}") as f:
+        tokens = load(f)
+        token_file_present = True
+
+
+@dataclass
+class S3Features:
+    local_path: str = "./data/online_retail_data.csv"
+    endpoint: str = tokens["endpoint_url"] if token_file_present else ""
+    bucket: str = tokens["bucket"] if token_file_present else ""
+    path: str = tokens["path"] if token_file_present else ""
+    key_id: str = tokens["key_id"] if token_file_present else ""
+    access_key: str = tokens["access_key"] if token_file_present else ""
+    token: str = tokens["token"] if token_file_present else ""
 
 
 @dataclass

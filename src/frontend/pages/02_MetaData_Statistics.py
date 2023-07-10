@@ -9,18 +9,48 @@ from src.config import RawFeatures, DataProcessingFeatures
 
 year = st.session_state["year_adhesion"]
 quarter = st.session_state["quarter_adhesion"]
+status = st.session_state["status"]
 
 
 st.markdown(
     """
     # Metadata Statistics
 
+    Remind on cohort properties
+    """
+)
+
+
+(
+    col_status,
+    col_adh_year,
+    col_adh_month,
+) = st.columns(3)
+
+
+col_adh_year.metric(
+    "Adhesion Year",
+    f"{year}"
+)
+col_adh_month.metric(
+    "Adhesion Quarter",
+    f"{quarter}"
+)
+col_status.metric(
+    "Cohort Status",
+    f"{status}"
+)
+
+
+st.markdown(
+    """
     The following metrics and table describe the transaction \
     data of the cohort:
     """
 )
 
-df_transaction = getDataset()
+
+df_transaction = getDataset(year, quarter, status)
 metadata_stats = Statistics(df_transaction).metadata_stats()
 
 
