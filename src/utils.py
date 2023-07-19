@@ -6,6 +6,8 @@ from numpy import full, arange
 import plotly.graph_objects as go
 from pandas import read_csv, DataFrame, to_datetime
 from typing import Union, Tuple, List
+from streamlit import cache_data
+
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.config import RawFeatures, AlivePlot_Params, Metadata_Features
@@ -28,8 +30,8 @@ def datetime_formatting(
     input_dt_format: str = "%d/%m/%Y %H:%M",
     output_dt_format: str = "%Y-%m-%d %H:%M",
 ) -> DataFrame:
-    """Format a date colum in a dateframe in order to match
-    the lifetime package requirements
+    """Format a date colum in a dateframe in order to match the
+    lifetime package requirements
 
     Args:
         df_transaction_ (DataFrame): raw transactionnal dataframe
@@ -234,3 +236,14 @@ def _plot_probability_alive(
             annotation_text="Purchase",
         )
     return fig
+
+
+@cache_data
+def convert_df(df: DataFrame) -> None:
+    """Convert datframe to csv with caching capabilities
+    to avoid rerun
+
+    Args:
+        df (DataFrame): a dataframe
+    """
+    return df.to_csv(sep=";", index=False).encode('utf-8')

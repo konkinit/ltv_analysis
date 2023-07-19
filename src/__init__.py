@@ -8,6 +8,7 @@ from .utils import (
     get_customer_last_transac_to_future_data,
     color_features,
     _plot_probability_alive,
+    convert_df
 )
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
     "get_customer_last_transac_to_future_data",
     "color_features",
     "_plot_probability_alive",
+    "convert_df"
 ]

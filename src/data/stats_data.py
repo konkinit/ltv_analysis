@@ -9,10 +9,15 @@ from src.config import RawFeatures, Metadata_Features
 
 
 class Statistics:
-    def __init__(self, data) -> None:
+    def __init__(self, data: DataFrame) -> None:
         self.data = data.copy()
 
     def metadata_stats(self) -> Metadata_Features:
+        """Compute and return metadata statistics
+
+        Returns:
+            Metadata_Features: statistics features wrapped in an object
+        """
         n_transactions = self.data.shape[0]
         n_vars = self.data.shape[1]
         n_distinct_custumers = len(self.data[RawFeatures.CUSTOMER_ID].unique())
@@ -43,6 +48,13 @@ class Statistics:
         )
 
     def rfm_data_stats(self) -> Tuple[int, DataFrame]:
+        """Compute and return metadata statistics
+
+        Returns:
+            Tuple[int, DataFrame]: RFM stats features: first elements
+            represents the number of distinct customers while the second
+            a dataframe containing relevant stats
+        """
         return (
             self.data.shape[0],
             self.data.describe().round(2).iloc[[0, 1, 2, 3, 5, 7], :]

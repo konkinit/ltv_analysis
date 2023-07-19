@@ -36,10 +36,11 @@ class RawFeatures:
     PRICE: str = "Price"
     QTY: str = "Quantity"
     TOTAL_PRICE: str = "Total Price"
-    frequency: str = "frequency"
-    recency: str = "recency"
     T: str = "T"
     DATE_T: str = "date_T"
+    ALIVE_PROBA: str = "alive_probability"
+    frequency: str = "frequency"
+    recency: str = "recency"
     monetary: str = "monetary_value"
 
 

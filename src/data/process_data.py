@@ -21,6 +21,8 @@ class ProcessData:
         self.calibration_period_end = params.calibration_period_end
 
     def clean_data(self) -> None:
+        """Cleaner of data processing
+        """
         self.data[RawFeatures.TRANSACTION_DATE] = to_datetime(
             self.data[RawFeatures.TRANSACTION_DATE]
         ).dt.date
@@ -35,6 +37,11 @@ class ProcessData:
         )
 
     def model_data(self) -> DataFrame:
+        """Use Lifetimes functions to produce RFM data
+
+        Returns:
+            DataFrame: RFM data
+        """
         self.clean_data()
         df_ = summary_data_from_transaction_data(
             self.data[
@@ -49,4 +56,6 @@ class ProcessData:
             monetary_value_col=RawFeatures.TOTAL_PRICE,
             freq=self.freq,
         )
-        return df_[df_[RawFeatures.frequency] > 0]
+        return df_.query(
+            f"{RawFeatures.frequency} > 0"
+        )

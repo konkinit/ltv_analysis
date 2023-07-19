@@ -148,6 +148,15 @@ class _BetaGeoModel(BetaGeoModel):
         (min_p_alive_, max_p_alive_) = self.probability_alive_features(
             rfm_data_from_last
         )
+        customer_.alive_probability_futur = (
+            p_alive_xarray
+            .mean(("draw", "chain"))
+            .to_numpy()[
+                rfm_data_from_last[
+                    rfm_data_from_last[RawFeatures.T] == n_period+customer_.T
+                ].index.values[0]
+            ]
+        )
         status_study_time_color = (
             "green"
             if alive_p_study_time > 0.7

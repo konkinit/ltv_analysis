@@ -26,6 +26,7 @@ class Customer:
         self.recency = 0
         self.monetary = 0.0
         self.alive_probability = 0.0
+        self.alive_probability_futur = 0.0
 
     def rfm_data(
             self, gloabl_rfm_data: DataFrame
@@ -47,6 +48,9 @@ class Customer:
             gloabl_rfm_data.loc[self.id][RawFeatures.monetary]
         )
         return gloabl_rfm_data.loc[self.id]
+
+    def inference_data(self):
+        pass
 
     def rfm_data_from_last(
             self,
