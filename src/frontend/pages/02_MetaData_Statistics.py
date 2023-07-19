@@ -16,7 +16,7 @@ st.markdown(
     """
     # Metadata Statistics
 
-    Remind on cohort properties
+    Remind on cohort characteristics
     """
 )
 

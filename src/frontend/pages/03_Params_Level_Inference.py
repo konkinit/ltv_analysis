@@ -64,5 +64,6 @@ col_r.metric(
 )
 
 st.plotly_chart(
-    betageo_model._global_plots()
+    betageo_model._global_plots(),
+    use_container_width=True
 )

@@ -12,7 +12,7 @@ st.markdown(
     # Inference on Customer Level
 
     This poage is designed to highlight customers' metrics obtained
-    from thz model.
+    from the model.
     """
 )
 
@@ -23,7 +23,13 @@ last_transac_date = st.session_state["metadata_stats"].last_transac_date[:10]
 freq = betageo_model.freq
 
 customer_id = st.selectbox(
-    "For more insights on a customer, choose his ID", list_cohort_customers
+    "For more insights on a customer, choose his ID",
+    sorted(
+        list_cohort_customers,
+        key=lambda x: betageo_model.probability_alive_study_instant(
+                    Customer(x)
+        )
+    )
 )
 n_period = st.number_input(
     "Enter the number of period in the future for prediction", min_value=2
@@ -64,4 +70,4 @@ col_frequency.metric("Frequency", f"{customer.frequency}")
 col_monetaryy.metric("Monetary", f"{round(customer.monetary, 2)}")
 col_age.metric("Age", f"{customer.T} {freq}")
 
-st.plotly_chart(fig)
+st.plotly_chart(fig, use_container_width=True)

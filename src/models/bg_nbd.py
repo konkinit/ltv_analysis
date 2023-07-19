@@ -177,7 +177,7 @@ class _BetaGeoModel(BetaGeoModel):
         self,
         max_frequency=None,
         max_recency=None,
-        title="Probability Customer is Alive",
+        title="Probability Cohort Customer is Alive",
         xlabel="Customer's Historical Frequency",
         ylabel="Customer's Recency",
         **kwargs

@@ -27,11 +27,6 @@
 
 
 
-## Project description
-
-The `BG/NBD` model predicts the future expected number of transactions over a pre-defined period
-together with the probability of a customer being alive.
-
 ## Citations
 
 ```bib
