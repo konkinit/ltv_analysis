@@ -8,6 +8,7 @@ from pymc_marketing.clv import (
     BetaGeoModel,
 )
 from pymc import HalfNormal
+import pymc.sampling.jax as pmjax
 from typing import Any, Tuple, List
 
 if os.getcwd() not in sys.path:
@@ -17,6 +18,14 @@ from src.config import RawFeatures, AlivePlot_Params, Metadata_Features
 from src.utils import (
     _plot_probability_alive
 )
+
+
+jax_sampling_params = {
+    "tune": 10000,
+    "draws": 1000,
+    "chains": 1,
+    "random_seed": 123
+}
 
 
 class _BetaGeoModel(BetaGeoModel):
@@ -39,6 +48,18 @@ class _BetaGeoModel(BetaGeoModel):
             alpha_prior=HalfNormal.dist(10),
             r_prior=HalfNormal.dist(10)
         )
+
+    def _fit_mcmc(self, **kwargs):
+        """Draw samples from model posterior using MCMC sampling
+        by leveraging GPU capabilities if available
+
+        Returns:
+            _type_: _description_
+        """
+        with self.model:
+            return pmjax.sample_numpyro_nuts(
+                **jax_sampling_params
+            )
 
     def fit_or_load_model(self):
         pass

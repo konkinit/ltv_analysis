@@ -11,6 +11,9 @@ from src.data import Customer
 from src.config import RawFeatures
 
 
+year = st.session_state["year_adhesion"]
+quarter = st.session_state["quarter_adhesion"]
+status = st.session_state["status"]
 betageo_model = st.session_state["betageo_model"]
 list_cohort_customers = st.session_state["list_cohort_customers"]
 last_transac_date = st.session_state["metadata_stats"].last_transac_date[:10]
@@ -123,6 +126,6 @@ csv = convert_df(df_customer_alive_proabiliity)
 st.download_button(
     label="Download customers' alive probability as CSV",
     data=csv,
-    file_name='customers_alive_proba.csv',
+    file_name=f'customers_alive_proba_{status}_{str(year)[2:]}_{quarter}.csv',
     mime='text/csv',
 )
