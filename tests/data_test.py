@@ -13,6 +13,8 @@ def test_getDaaset():
 
 
 def test_data_processing():
+    """Assert frequency and recency order
+    """
     data_inst = ProcessData(DataProcessingFeatures(
         getDataset(), "D", "2011-06-30"
         )

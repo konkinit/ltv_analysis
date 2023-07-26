@@ -1,3 +1,3 @@
-pip install -r requirements.py
+pip install -r ./requirements.txt
 
-pip install "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+pip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html

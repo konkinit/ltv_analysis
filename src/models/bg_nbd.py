@@ -1,5 +1,6 @@
 import os
 import sys
+from jax import default_backend
 from numpy import arange, meshgrid
 from pandas import DataFrame
 from plotly.express import imshow
@@ -7,7 +8,7 @@ from plotly.graph_objects import Figure
 from pymc_marketing.clv import (
     BetaGeoModel,
 )
-from pymc import HalfNormal
+from pymc import HalfNormal, sample
 import pymc.sampling.jax as pmjax
 from typing import Any, Tuple, List
 
@@ -20,12 +21,16 @@ from src.utils import (
 )
 
 
-jax_sampling_params = {
-    "tune": 10000,
-    "draws": 1000,
+JAX_SAMPLING_PARAMS = {
+    "tune": 1_000,
+    "draws": 1_000,
     "chains": 1,
-    "random_seed": 123
+    "random_seed": 123,
+    "chain_method": "parallel"
 }
+
+
+BACKEND_DEVICE = "gpu"
 
 
 class _BetaGeoModel(BetaGeoModel):
@@ -54,12 +59,15 @@ class _BetaGeoModel(BetaGeoModel):
         by leveraging GPU capabilities if available
 
         Returns:
-            _type_: _description_
+            _type_: sampler
         """
         with self.model:
-            return pmjax.sample_numpyro_nuts(
-                **jax_sampling_params
-            )
+            if default_backend() == BACKEND_DEVICE:
+                return pmjax.sample_numpyro_nuts(
+                    **JAX_SAMPLING_PARAMS,
+                    **kwargs
+                )
+            return sample(**kwargs)
 
     def fit_or_load_model(self):
         pass
@@ -102,7 +110,8 @@ class _BetaGeoModel(BetaGeoModel):
             customer_history (DataFrame): customer's RFM history data
 
         Returns:
-            Tuple[float, float]: min and max of customer's alive probabilities
+            Tuple[float, float]: min and max of customer's alive
+            probabilities
         """
         p_alive_xarray = self.probability_alive_xarray(customer_history)
         min_p_alive_ = p_alive_xarray.to_numpy().min(axis=0).min(axis=0)

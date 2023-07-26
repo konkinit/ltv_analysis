@@ -7,7 +7,17 @@ if os.getcwd() not in sys.path:
 from src.models import _BetaGeoModel
 
 
-st.title("Customer LifeTime Value Modeling")
+_rfm_data = __import__(
+    'pages.02_MetaData_Statistics',
+    fromlist=['_rfm_data']
+)._rfm_data
+
+
+st.title(
+    """
+    Customer LifeTime Value Modeling with Beta-Geo
+    """
+)
 
 
 st.markdown(
@@ -36,7 +46,7 @@ st.markdown(
     """
 )
 
-rfm_data = st.session_state["rfm_data"]
+rfm_data = _rfm_data()
 study_freq = st.session_state["study_freq"]
 metadata_stats = st.session_state["metadata_stats"]
 

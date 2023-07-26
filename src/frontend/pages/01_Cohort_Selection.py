@@ -13,7 +13,7 @@ dict_cohort = {
         f"Q{i}" for i in range(1, 1+ceil((date.today().month)/3))
     ]
 }
-list_status = ["Silver", "Gold", "Platinum"]
+list_status = ["Gold", "Platinum", "Silver"]
 
 
 st.markdown(

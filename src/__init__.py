@@ -1,5 +1,6 @@
 from .config import config_data
 from .data import import_data, process_data
+from .frontend import pages, Onboarding
 from .models import bg_nbd
 from .utils import (
     datetime_formatting,
@@ -11,7 +12,10 @@ from .utils import (
     convert_df
 )
 
+
 __all__ = [
+    "pages",
+    "Onboarding",
     "datetime_formatting",
     "config_data",
     "import_data",

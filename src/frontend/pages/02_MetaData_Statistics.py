@@ -1,6 +1,7 @@
 import os
 import sys
 import streamlit as st
+
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 from src.data import getDataset, Statistics, ProcessData
@@ -11,7 +12,6 @@ year = st.session_state["year_adhesion"]
 quarter = st.session_state["quarter_adhesion"]
 status = st.session_state["status"]
 
-
 st.markdown(
     """
     # Metadata Statistics
@@ -20,13 +20,11 @@ st.markdown(
     """
 )
 
-
 (
     col_status,
     col_adh_year,
     col_adh_month,
 ) = st.columns(3)
-
 
 col_adh_year.metric(
     "Adhesion Year",
@@ -41,7 +39,6 @@ col_status.metric(
     f"{status}"
 )
 
-
 st.markdown(
     """
     The following metrics and table describe the transaction \
@@ -49,13 +46,10 @@ st.markdown(
     """
 )
 
-
 df_transaction = getDataset(year, quarter, status)
 metadata_stats = Statistics(df_transaction).metadata_stats()
 
-
 st.session_state["metadata_stats"] = metadata_stats
-
 
 colCust, colTransac = st.columns(2)
 colCust.metric("Number of Distinct customers", f"\
@@ -94,7 +88,6 @@ calibration_end_dt = st.text_input(
     help="The entered date must be in type YYYY-MM-DD"
 )
 
-
 rfm_data = ProcessData(
     DataProcessingFeatures(
         df_transaction.copy(),
@@ -129,10 +122,18 @@ st.dataframe(
     use_container_width=True
 )
 
-
-st.session_state["rfm_data"] = rfm_data
 st.session_state["list_cohort_customers"] = list(
     rfm_data.reset_index().iloc[:, 0].unique()
 )
 st.session_state["study_freq"] = study_freq
 st.session_state["calibration_end_dt"] = calibration_end_dt
+
+
+@st.cache_data
+def _rfm_data():
+    """Return cached data
+
+    Returns:
+        DataFrame: dataframe
+    """
+    return rfm_data
